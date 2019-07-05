@@ -6,5 +6,8 @@ env_variables:
     GAE_USE_CTYPES: '1'
 
 handlers:
-- url: /.*
+- url: /
   script: main.app
+  
+- url: /glucosa/
+  script: mainglucosa.app
