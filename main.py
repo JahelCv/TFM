@@ -13,10 +13,16 @@
 # limitations under the License.
 
 import webapp2
-import xalglib
+#from AccionesComunicaNAO import AccionesComunicaNAO
+#import xalglib
 
 
 class MainPage(webapp2.RequestHandler):
+    
+#    def __init__(self):
+#        self.ac = AccionesComunicaNAO()
+#        self.ac.decirFrase('Empezamos')
+    
     def get(self):
 
 #		# L-BFGS optimizer with m=2 is created, one result is returned
@@ -33,7 +39,6 @@ class MainPage(webapp2.RequestHandler):
 		self.response.headers['Content-Type'] = 'text/plain'
 #		self.response.write(str(x))
 		self.response.write('holi')
-
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),

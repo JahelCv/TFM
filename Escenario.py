@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
-import DatosCompartidos
+from DatosCompartidos import DatosCompartidos
+from AccionesComunicaNAO import AccionesComunicaNAO
 from collections import deque
 from time import time
 import random
+from Runnable import Runnable
 
-class Escenario():
+PARADO = 0
+CORRIENDO = 1
+PAUSADO = 2 
+
+class Escenario(Runnable):
     def __init__(self):
-        self.pausa = False;
+        super().__init__()        
+        self.pausa = False
         self.glucosa = deque((-1, -1, -1, -1, -1))
         self.exactitud = 0.3
         self.tiempoUltimaPeticionSimu = time()
@@ -22,14 +29,14 @@ class Escenario():
         
     def guardarGlucosa(self, glu):
         # insertamos nuevo
-        self.glucosa.append(glu)
+        self.glucosa.appendleft(glu)
         # quitamos antiguo
-        self.glucosa.popleft()
+        self.glucosa.pop()
         
     def mirarGlucosa(self):
-        glucosaAux = self.datos.getData("GLUCOSA");
-        self.guardarGlucosa(glucosaAux);
-        return glucosaAux;
+        glucosaAux = self.datos.getData("GLUCOSA")
+        self.guardarGlucosa(glucosaAux)
+        return glucosaAux
         
     def pararThread(self):
         self.pararLoop = False
