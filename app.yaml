@@ -15,5 +15,5 @@ handlers:
 - url: /RegisterNAO/(.*)/
   script: main.app
   
- - url: /RegisterNAO/(.*)/Delete/
+- url: /RegisterNAO/(.*)/Delete/
   script: main.app

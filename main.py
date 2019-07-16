@@ -1,6 +1,6 @@
 import webapp2
 from EncolaSimuladores import EncolaSimuladores
-from Simulador import Simulador
+# from Simulador import Simulador
 
 es = EncolaSimuladores()
 
@@ -12,7 +12,8 @@ class MainPage(webapp2.RequestHandler):
 class RegisterNAO(webapp2.RequestHandler):
     def get(self):
         # Creamos un simulador para cada NAO que se registre
-        s = Simulador()
+        # s = Simulador()
+        s = 'sim'
         r = es.anyadirNAO(s)
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.write(r)

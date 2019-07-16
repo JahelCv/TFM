@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from multiprocessing import Lock
+#from subprocess import _args_from_interpreter_flags
+from threading import Lock
 
 class EncolaSimuladores:
     def __init__(self):
