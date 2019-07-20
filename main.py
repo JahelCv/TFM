@@ -26,8 +26,29 @@ class DeleteNAO(webapp2.RequestHandler):
     def put(self, nao_id):
         es.quitarNAO(id)
 
+class DatosSimulacion(webapp2.RequestHandler):
+    # introducir datos de cho, bolus, ejercicio, etc    
+    def put(self, nao_id):
+        #es.quitarNAO(id)
+        print('')
+        
+class DatoGlucosa(webapp2.RequestHandler):
+    def get(self, nao_id):
+        es.getSimulador(nao_id).glucosa
+        
+    def put(self, nao_id):
+        es.getSimulador(nao_id).setGlucosa()
+        
+class ModoSimulador(webapp2.RequestHandler):
+    # introducir datos de cho, bolus, ejercicio, etc    
+    def put(self, nao_id):
+        es.quitarNAO(id)
+
 app = webapp2.WSGIApplication([(r'/', MainPage),
                                (r'/RegisterNAO/', RegisterNAO),
                                (r'/RegisterNAO/(.*)/', GetByIDNAO),
-                               (r'/RegisterNAO/(.*)/Delete/', DeleteNAO),]
+                               (r'/RegisterNAO/(.*)/Delete/', DeleteNAO),
+                               (r'/RegisterNAO/(.*)/DatosSimulacion/', DatosSimulacion),
+                               (r'/RegisterNAO/(.*)/Glucosa/', DatoGlucosa),
+                               (r'/RegisterNAO/(.*)/ModoSimulador/', ModoSimulador),]
                                , debug=True)

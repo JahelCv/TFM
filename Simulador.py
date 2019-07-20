@@ -1,21 +1,15 @@
 # http://www.alglib.net/translator/man/manual.cpython.html
-from Runnable import Runnable
-from DatosCompartidos import DatosSimulador, DatosCompartidos
 import xalglib
 from time import time
 
-# def ode_function_1_diff(self, &x, t, &dx, *ptr):
-PATHNAO = "/home/nao/naoqi/simulador.txt"
-PATHMIPC = "C:\Users\Jahel\Documents\TFM\PythonNAO\pythonserver27\simulador.txt"
+#PARADO = 0
+#CORRIENDO = 1
+#PAUSADO = 2 
 
-PARADO = 0
-CORRIENDO = 1
-PAUSADO = 2 
-
-class Simulador(Runnable):
+class Simulador():
     def __init__(self):
-        super().__init__()  
-        self.modo = 2  #modo por defecto
+        # Modo del simulador (no tiene que ver con Runnable)
+        self.modo = 2  #modo por defecto (1,2,3)
         self.bw = 70
         self.tmaxG = 40                 # min
         self.vg = 0.16 * self.bw            # L
@@ -27,10 +21,9 @@ class Simulador(Runnable):
         self.bolus = 0
         self.cho = 0
         self.ejercicio = False
+        # self.exercise = ejerciciotiempo, ejercicioIntesidad, ejercicioDuracion
         self.exercise = list([0,0,0])
         self.flagThread = True
-        self.flagPausar = False
-        self.datosC = None
     
         self.t = []
         self.x = []
@@ -46,131 +39,79 @@ class Simulador(Runnable):
                   'cho' : None,
                   'exercise' : list([0,0,0]),
                   'ejercicio' : None}
-
-    def setDatosCompartidos(self, d):    
-        if d != None:        
-            self.datosC = d
-            self.datosC.setData("GLUCOSA",float(-1000),True)
-            self.datosC.setData("MODOSIMU",int(2),False)
-            return 1
-        return-1
-    
-    ### De Runnable
-    def pararThread(self):
-        self.flagThread = False
-        if self.flagPausar == True:        
-            self.flagPausar = False
-            self.liberarCondicion()
-        
-    ### De Runnable
-    def pausar(self):
-        self.flagPausar = True
-        self.setEstadoHilo(PAUSADO)
-    
-    ### De Runnable
-    def desPausar(self):
-        if self.flagPausar == True:        
-            self.flagPausar = False
-            self.liberarCondicion()
-
-    def setModo(self, modo):
-        self.modo = modo
+                  
+        self.glucosa = -1000
     
     def ConfigurarSimulador(self):
         if self.modo == 1:
             self.pasosSimulacion = 60
-            self.marcaLimite=60
+            self.marcaLimite = 60
         elif self.modo == 2:
             self.pasosSimulacion = 96
-            self.marcaLimite=96
+            self.marcaLimite = 96
         elif self.modo == 3:
             self.pasosSimulacion = 120
-            self.marcaLimite=120
+            self.marcaLimite = 120
         else:
-            print '%%%%ERROR en void Simular: Modo no seleccionado correctamente, de tiempos mal.'
-    
-        #Construir vector de tiempos que usaremos
-        f = open(PATHMIPC, "a+")
-        f.write(str(self.pasosSimulacion)+'\n')
-        f.close()
+            print '%%%% ERROR en void Simular: Modo no seleccionado correctamente, de tiempos mal.'
+
         valort = 0
         for i in range(0,self.pasosSimulacion):
             self.t.append(valort)
             valort = valort + 5
         
-        #estadoInicial del simulador (para la primera simulacion)
+        # estadoInicial del simulador (para la primera simulacion)
         self.x = [0,0, 366.6667,366.6667, 5.7511,0.0294,0.0047,0.2991,56.5688, 23.5554]
-    
-        self.tiempoIniPausado = 0
-        self.tiempoTotalPausado = 0
         time.sleep(0.5)
     
     def run(self):
         try:
-            modoAux = self.datosC.getData("MODOSIMU")
-            if modoAux == 1:            
-                self.modo = modoAux
-            else:
-                self.modo = 2
             self.ConfigurarSimulador()
             self.simular()
             self.calcularGlucosa()
             self.tiempoUltimaSimu = time()
     
             while (self.flagThread):
-               #mirar pausa
-               if self.flagPausar == True:               
-                   self.tiempoIniPausado = time()
-                   if  self.datosC != None:
-                       self.datosC.modifyData("GLUCOSA",float(-999))
-                   self.esperarCondicion()
-                   self.tiempoTotalPausado = self.tiempoTotalPausado + (time() - self.tiempoIniPausado)
-    
-               #miramos si tenemos nuevos datos para realizar la simulacion
-               if self.datosC != None:
-                   self.datosSimu = self.datosC.getDatosSimulacion()
-    
-               if self.datosSimu.bolus == 0 and self.datosSimu.cho == 0 and self.datosSimu.ejercicio == False:
-                   #obtenemos marca altual del simulador
+               # Si no hay ningun dato para simular de nuevo...
+               if self.bolus == 0 and self.cho == 0 and self.ejercicio == False:
+                   # obtenemos marca altual del simulador
                    self.calcularMarcaActual()
-                   if self.datosC != None:
-                        self.datosC.modifyData("GLUCOSA",float(self.SimVolGlucosaTotal[self.marca]))
-                   #Se ejecutará una simulacion sin entradas si pasan 5 minutos y no hay eventos.                   
+                   self.glucosa = float(self.SimVolGlucosaTotal[self.marca])
+                   # Se ejecutará una simulacion sin entradas si pasan 5 minutos y no hay eventos.                   
                    if self.marca >= self.marcaLimite:
                        self.actualizarEstadoInicial(len(self.xtbl)-1)
                        self.simular()
                        self.calcularGlucosa()
                        self.tiempoUltimaSimu = time()
-                       self.tiempoIniPausado = 0
-                       self.tiempoTotalPausado = 0
                    else:
                        time.sleep(1)
-    
+                
+                # Si hay algun dato nuevo...
                else:
                    #valores de bolus, o ejercicio nuevos, actualizamos
-                   self.bolus = self.datosSimu.bolus
-                   self.cho = self.datosSimu.cho
-                   self.ejercicio = self.datosSimu.ejercicio
-                   self.exercise[0] = self.datosSimu.ejercicioTiempo; #ejeTiempo
-                   self.exercise[1] = self.datosSimu.ejercicioIntesidad; #ejeIntensidad
-                   self.exercise[2] = self.datosSimu.ejercicioDuracion; #ejeDuracion
                    self.actualizarEstadoInicial(self.marca)
                    self.simular()
                    self.calcularGlucosa()
                    self.tiempoUltimaSimu = time()
-                   self.tiempoIniPausado = 0
-                   self.tiempoTotalPausado = 0
     
             # Fuera del while
             self.flagThread = True
-            if  self.datosC != None:
-                self.datosC.modifyData("GLUCOSA",float(-1000))
+            self.glucosa = -1000
         except Exception as e:
-            f = open(PATHMIPC, "a+")
-            f.write('error :'+str(e)+'\n')
-            f.close()
+            print 'error: ' + str(e)
             return
+    ########################################################################    
+    ###################### METODOS QUE SE UTILIZAN EN MAINAPP ##############
+    ########################################################################
+    def setModo(self, modo):
+        self.modo = modo
+        
+    def setGlucosa(self, glucosa):
+        self.glucosa = glucosa
     
+    ########################################################################    
+    ###################### METODOS QUE SE UTILIZAN EN RUN ##################
+    ########################################################################
     def simular(self):
         eps = 0.00001
         h = 0
@@ -201,7 +142,8 @@ class Simulador(Runnable):
             self.SimVolGlucosaTotal[i] = float(18 * self.xtbl[i][8] / self.vg)
     
     def calcularMarcaActual(self):
-        tiempo = (time() - self.tiempoUltimaSimu) - self.tiempoTotalPausado
+        # tiempo = (time() - self.tiempoUltimaSimu) - self.tiempoTotalPausado
+        tiempo = (time() - self.tiempoUltimaSimu)
         if self.pasosSimulacion == 60:
             self.marca = tiempo/4.918
         if self.pasosSimulacion == 96:
@@ -221,10 +163,9 @@ class Simulador(Runnable):
         self.x[8] = self.xtbl[marca,8]
         self.x[9] = self.xtbl[marca,9]
     
-#la funcion que necesita odesolversolve tiene que ser una funcion normal (no mienbro de la clase) ya que odesolversolve espera un un puntero a funcion (*)(void)
-#en caso de que esta funcion fuera mienbro de la clase tendriamos (Simulador.*)(void) y nos daria un error
+# la funcion que necesita odesolversolve tiene que ser una funcion normal
+# (no mienbro de la clase) 
 def ode_function_1_diff(x, t, dx, ptr):
-
 #    data_struct *datos
 #    datos = (data_struct*) ptr
     datos = ptr

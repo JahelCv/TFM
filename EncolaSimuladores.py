@@ -27,3 +27,9 @@ class EncolaSimuladores:
         self.mutex.acquire()
         del self.s[id]
         self.mutex.release()
+        
+    def getSimulador(self,id):
+        self.mutex.acquire()
+        ret = self.s.get(id)
+        self.mutex.release()
+        return ret
