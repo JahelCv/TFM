@@ -1,12 +1,14 @@
 # http://www.alglib.net/translator/man/manual.cpython.html
+from __future__ import print_function
 import xalglib
-from time import time
+import time 
+import sys
 
 #PARADO = 0
 #CORRIENDO = 1
 #PAUSADO = 2 
 
-class Simulador():
+class Simulador(object):
     def __init__(self):
         # Modo del simulador (no tiene que ver con Runnable)
         self.modo = 2  #modo por defecto (1,2,3)
@@ -29,7 +31,7 @@ class Simulador():
         self.x = []
         self.SimVolGlucosaTotal = []
         
-        #creamos dato compartido para la glucosa, marcamos como enviable y añadimos referencia a datoscompartidos
+        #creamos dato compartido para la glucosa, marcamos como enviable y anyadimos referencia a datoscompartidos
         self.d = {'bw' : self.bw,
                   'tmaxG' : self.tmaxG,
                   'vg' : self.vg,
@@ -53,7 +55,7 @@ class Simulador():
             self.pasosSimulacion = 120
             self.marcaLimite = 120
         else:
-            print '%%%% ERROR en void Simular: Modo no seleccionado correctamente, de tiempos mal.'
+            print('%%%% ERROR en void Simular: Modo no seleccionado correctamente, de tiempos mal.')
 
         valort = 0
         for i in range(0,self.pasosSimulacion):
@@ -65,6 +67,7 @@ class Simulador():
         time.sleep(0.5)
     
     def run(self):
+        print('Arrancamos', file=sys.stdout)
         try:
             self.ConfigurarSimulador()
             self.simular()
@@ -72,12 +75,13 @@ class Simulador():
             self.tiempoUltimaSimu = time()
     
             while (self.flagThread):
+               print('Simulador - Bucle en while', file=sys.stdout)
                # Si no hay ningun dato para simular de nuevo...
                if self.bolus == 0 and self.cho == 0 and self.ejercicio == False:
                    # obtenemos marca altual del simulador
                    self.calcularMarcaActual()
                    self.glucosa = float(self.SimVolGlucosaTotal[self.marca])
-                   # Se ejecutará una simulacion sin entradas si pasan 5 minutos y no hay eventos.                   
+                   # Se ejecutara una simulacion sin entradas si pasan 5 minutos y no hay eventos.                   
                    if self.marca >= self.marcaLimite:
                        self.actualizarEstadoInicial(len(self.xtbl)-1)
                        self.simular()
@@ -98,16 +102,28 @@ class Simulador():
             self.flagThread = True
             self.glucosa = -1000
         except Exception as e:
-            print 'error: ' + str(e)
+            print('error: ' + str(e))
             return
     ########################################################################    
     ###################### METODOS QUE SE UTILIZAN EN MAINAPP ##############
     ########################################################################
     def setModo(self, modo):
-        self.modo = modo
+        self.modo = int(modo)
+        return True
+        
+    def getModo(self):
+        return self.modo
         
     def setGlucosa(self, glucosa):
-        self.glucosa = glucosa
+        self.glucosa = float(glucosa)
+        return True
+        
+    def getGlucosa(self):
+        return self.glucosa
+        
+    def pararSimulador(self):
+        self.flagThread = False
+        return True
     
     ########################################################################    
     ###################### METODOS QUE SE UTILIZAN EN RUN ##################

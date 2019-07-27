@@ -1,54 +1,44 @@
-import webapp2
-from EncolaSimuladores import EncolaSimuladores
-# from Simulador import Simulador
+# -*- coding: utf-8 -*-
+#from __future__ import print_function
+from flask import Flask, request
+from flask_restful import Resource, Api
+from Simulador import Simulador
+from threading import Thread
 
-es = EncolaSimuladores()
+app = Flask(__name__)
+api = Api(app)
+s = Simulador()    
 
-class MainPage(webapp2.RequestHandler):
+class HelloWorld(Resource):
     def get(self):
-		self.response.headers['Content-Type'] = 'text/plain'
- 		self.response.write('Bienvenido!')
-
-class RegisterNAO(webapp2.RequestHandler):
+        return "Bienvenido!"
+        
+class ModoSimulador(Resource):
     def get(self):
-        # Creamos un simulador para cada NAO que se registre
-        # s = Simulador()
-        s = 'sim'
-        r = es.anyadirNAO(s)
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write(r)
-   
-class GetByIDNAO(webapp2.RequestHandler):
-    def get(self, nao_id):
-        self.response.write('The NAO id is %s' % nao_id)
+        return s.getModo()
+    def put(self):
+        return s.setModo(request.form['data'])
         
-class DeleteNAO(webapp2.RequestHandler):
-    def put(self, nao_id):
-        es.quitarNAO(id)
+class Glucosa(Resource):
+    def get(self):
+        return s.getGlucosa()
+    def put(self):
+        return s.setGlucosa(request.form['data'])
+        
+class ArrancaHilo(Resource):
+    def get(self):
+        t = Thread(target=s.run)
+        t.start()
+        
+class ParaHilo(Resource):
+    def get(self):
+        return s.pararSimulador()
 
-class DatosSimulacion(webapp2.RequestHandler):
-    # introducir datos de cho, bolus, ejercicio, etc    
-    def put(self, nao_id):
-        #es.quitarNAO(id)
-        print('')
-        
-class DatoGlucosa(webapp2.RequestHandler):
-    def get(self, nao_id):
-        es.getSimulador(nao_id).glucosa
-        
-    def put(self, nao_id):
-        es.getSimulador(nao_id).setGlucosa()
-        
-class ModoSimulador(webapp2.RequestHandler):
-    # introducir datos de cho, bolus, ejercicio, etc    
-    def put(self, nao_id):
-        es.quitarNAO(id)
+api.add_resource(HelloWorld, '/')
+api.add_resource(ArrancaHilo, '/ArrancaHilo/')
+api.add_resource(ParaHilo, '/ParaHilo/')
+api.add_resource(ModoSimulador, '/ModoSimulador/')
+api.add_resource(Glucosa, '/Glucosa/')
 
-app = webapp2.WSGIApplication([(r'/', MainPage),
-                               (r'/RegisterNAO/', RegisterNAO),
-                               (r'/RegisterNAO/(.*)/', GetByIDNAO),
-                               (r'/RegisterNAO/(.*)/Delete/', DeleteNAO),
-                               (r'/RegisterNAO/(.*)/DatosSimulacion/', DatosSimulacion),
-                               (r'/RegisterNAO/(.*)/Glucosa/', DatoGlucosa),
-                               (r'/RegisterNAO/(.*)/ModoSimulador/', ModoSimulador),]
-                               , debug=True)
+if __name__ == '__main__':
+    app.run(host="127.0.0.1", port=80, debug=True)
