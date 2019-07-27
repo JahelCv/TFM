@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 import requests
 import time
-urlroot = "http://34.77.125.204:80/"
-urlmod = "http://34.77.125.204:80/ModoSimulador/"
-urlglu = "http://34.77.125.204:80/Glucosa/"
-urlpara = "http://34.77.125.204:80/ParaHilo/"
-urlarranca = "http://34.77.125.204:80/ArrancaHilo/"
+import json
+#urlroot = "http://34.77.125.204:80/"
+#urlmod = "http://34.77.125.204:80/ModoSimulador/"
+#urlglu = "http://34.77.125.204:80/Glucosa/"
+#urlpara = "http://34.77.125.204:80/ParaHilo/"
+#urlarranca = "http://34.77.125.204:80/ArrancaHilo/"
 
-#urlroot = "http://localhost:80/"
-#urlmod = "http://localhost:80/ModoSimulador/"
-#urlglu = "http://localhost:80/Glucosa/"
-#urlpara = "http://localhost:80/ParaHilo/"
-#urlarranca = "http://localhost:80/ArrancaHilo/"
+urlroot = "http://localhost:80/"
+urlmod = "http://localhost:80/ModoSimulador/"
+urlglu = "http://localhost:80/Glucosa/"
+urlpara = "http://localhost:80/ParaHilo/"
+urldats = "http://localhost:80/DatosSimulacion/"
+urlarranca = "http://localhost:80/ArrancaHilo/"
 
 ###### CONSULTA A ROOT #############
 #r = requests.get(urlroot)
@@ -40,8 +42,28 @@ print "Arranco hilo: " + r.content
 
 time.sleep(10)
 
+########### Pone datos para hacer deporte ############
+r = requests.put(urldats, json={'bolus' : 0, 'cho' : 0, 
+                'ejercicio' : True, 'exercise' : [0,50,60]})
+if r.ok:
+    print "Envio datos de simulacion: " + str(r.json())
+else:
+    print "No ok"
+
+time.sleep(45)
+
+ ########### Pone datos para tomarse un zumo ############
+r = requests.put(urldats, json={'bolus' : 0, 'cho' : 15, 
+                'ejercicio' : False, 'exercise' : [0,0,0]})
+if r.ok:
+    print "Envio datos de simulacion: " + str(r.json())
+else:
+    print "No ok"
+    
+time.sleep(30)
+
 r = requests.get(urlpara)
-print "Paro hilo: " + r.content
+print 'Hilo detenido ' + r.content
 
 ###### MODIFICAR GLUCOSA ###########
 #r = requests.put(urlglu, data={'data': 2345})
