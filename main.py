@@ -2,10 +2,10 @@
 from __future__ import print_function
 import sys
 from flask import Flask, request, jsonify
+from gevent.pywsgi import WSGIServer
 from flask_restful import Resource, Api
 from Simulador import Simulador
 from threading import Thread
-import json
 
 app = Flask(__name__)
 api = Api(app)
@@ -37,6 +37,14 @@ class ParaHilo(Resource):
     def get(self):
         return s.pararSimulador()
         
+class PausaHilo(Resource):
+    def get(self):
+        return s.pausarSimulador()
+        
+class DespausaHilo(Resource):
+    def get(self):
+        return s.despausarSimulador()
+        
 class DatosSimulacion(Resource):
     def get(self):
         return s.getDatosSimulacion()
@@ -49,9 +57,14 @@ class DatosSimulacion(Resource):
 api.add_resource(HelloWorld, '/')
 api.add_resource(ArrancaHilo, '/ArrancaHilo/')
 api.add_resource(ParaHilo, '/ParaHilo/')
+api.add_resource(PausaHilo, '/PausaHilo/')
+api.add_resource(DespausaHilo, '/DespausaHilo/')
 api.add_resource(ModoSimulador, '/ModoSimulador/')
 api.add_resource(Glucosa, '/Glucosa/')
 api.add_resource(DatosSimulacion, '/DatosSimulacion/')
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=80, debug=True)
+    # Debug/Development
+#    app.run(host="0.0.0.0", port=80, debug=True)
+    http_server = WSGIServer(('', 80), app)
+    http_server.serve_forever()

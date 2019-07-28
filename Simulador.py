@@ -3,7 +3,7 @@ from __future__ import print_function
 import xalglib
 import time 
 import sys
-from threading import Lock
+from threading import Lock, Condition
 
 #PARADO = 0
 #CORRIENDO = 1
@@ -12,6 +12,7 @@ from threading import Lock
 class Simulador(object):
     def __init__(self):
         self.mutex= Lock()        
+        self.cv = Condition()
         
         # Modo del simulador (no tiene que ver con Runnable)
         self.modo = 2  #modo por defecto (1,2,3)
@@ -29,10 +30,16 @@ class Simulador(object):
         # self.exercise = ejerciciotiempo, ejercicioIntesidad, ejercicioDuracion
         self.exercise = list([0,0,0])
         self.flagThread = True
+        self.flagPausa = False
     
         self.t = []
         self.x = []
         self.SimVolGlucosaTotal = [0]*121
+        
+        # Tiempos
+        self.tiempoUltimaSimu = 0
+        self.tiempoIniPausado = 0
+        self.tiempoTotalPausado = 0
         
         #creamos dato compartido para la glucosa, marcamos como enviable y anyadimos referencia a datoscompartidos
         self.d = {'bw' : self.bw,
@@ -67,6 +74,8 @@ class Simulador(object):
         
         # estadoInicial del simulador (para la primera simulacion)
         self.x = [0,0, 366.6667,366.6667, 5.7511,0.0294,0.0047,0.2991,56.5688, 23.5554]
+        self.tiempoIniPausado = 0
+        self.tiempoTotalPausado = 0
         time.sleep(0.5)
     
     def run(self):
@@ -82,6 +91,18 @@ class Simulador(object):
             self.mutex.release()
     
             while (self.flagThread):
+               # Mirar si hay pausa
+               if self.flagPausa:
+                   print('Run(): Entra en pausa', file=sys.stdout)
+                   self.tiempoIniPausado = time.time()
+                   self.glucosa = -999
+                   self.cv.acquire()
+                   self.cv.wait()
+                   self.cv.release()
+                   self.flagPausa = False
+                   self.tiempoTotalPausado = self.tiempoTotalPausado + (time.time()-self.tiempoIniPausado)
+                   print('Run(): Finalizada pausa, self.tiempoTotalPausado: ' + str(self.tiempoTotalPausado), file=sys.stdout)
+                
                # Si no hay ningun dato para simular de nuevo...               
                if self.bolus == 0 and self.cho == 0 and self.ejercicio == False:
                    self.mutex.acquire()
@@ -96,6 +117,8 @@ class Simulador(object):
                        self.simular()
                        self.calcularGlucosa()
                        self.tiempoUltimaSimu = time.time()
+                       self.tiempoIniPausado = 0
+                       self.tiempoTotalPausado = 0
                        self.mutex.release()
                    else:
 #                       print('Run(): Bolus/Cho/Ejercicio nada nuevo y marca(' + str(self.marca)+') < marcaLimite(' + str(self.marcaLimite) + ')', file=sys.stdout)
@@ -105,12 +128,14 @@ class Simulador(object):
                 # Si hay algun dato nuevo...
                else:
                    self.mutex.acquire()
-                   print('Run(): Bolus/Cho/Ejercicio contienen algo!', file=sys.stdout)
+                   print('Run(): Bolus('+str(self.bolus)+')/Cho('+str(self.cho)+')/Ejercicio('+str(self.ejercicio)+') contienen algo!', file=sys.stdout)
                    #valores de bolus, o ejercicio nuevos, actualizamos
                    self.actualizarEstadoInicial(self.marca)
                    self.simular()
                    self.calcularGlucosa()
                    self.tiempoUltimaSimu = time.time()
+                   self.tiempoIniPausado = 0
+                   self.tiempoTotalPausado = 0
                    self.mutex.release()
     
             # Fuera del while
@@ -150,6 +175,18 @@ class Simulador(object):
         self.mutex.acquire()
         self.flagThread = False
         self.mutex.release()
+        return True
+        
+    def pausarSimulador(self):
+        self.mutex.acquire()
+        self.flagPausa = True
+        self.mutex.release()
+        return True
+        
+    def despausarSimulador(self):
+        self.cv.acquire()
+        self.cv.notifyAll()
+        self.cv.release()
         return True
         
     def setDatosSimulacion(self, d):
@@ -211,7 +248,7 @@ class Simulador(object):
     
     def calcularMarcaActual(self):
         # tiempo = (time() - self.tiempoUltimaSimu) - self.tiempoTotalPausado
-        tiempo = (time.time() - self.tiempoUltimaSimu)
+        tiempo = (time.time() - self.tiempoUltimaSimu - self.tiempoTotalPausado)
         if self.pasosSimulacion == 60:
             self.marca = tiempo/4.918
         if self.pasosSimulacion == 96:
