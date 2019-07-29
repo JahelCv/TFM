@@ -20,7 +20,6 @@ class DatosSimulador():
         
 # Clase principal de compartidos
 class DatosCompartidos():
-    
     def __init__(self):
         self.mutex = Lock()
         self.mutexsim = Lock()

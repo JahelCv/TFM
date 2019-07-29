@@ -13,8 +13,6 @@
 ##########################################################################
 
 import ctypes
-
-import ctypes
 import sys
 import os
 

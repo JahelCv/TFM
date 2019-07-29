@@ -10,10 +10,10 @@ CORRIENDO = 1
 PAUSADO = 2 
 
 class Interaccion(Runnable):
-    def __init__(self):
+    def __init__(self, d, ac):
         super().__init__()
-        self.ac = None
-        self.datos = None
+        self.ac = ac
+        self.datos = d
         self.glucosa = deque((-1, -1, -1, -1, -1))
         self.contador = 1
         self.wordlist = deque()

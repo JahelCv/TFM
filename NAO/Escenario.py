@@ -11,15 +11,15 @@ CORRIENDO = 1
 PAUSADO = 2 
 
 class Escenario(Runnable):
-    def __init__(self):
+    def __init__(self, d, ac):
         super().__init__()        
         self.pausa = False
         self.glucosa = deque((-1, -1, -1, -1, -1))
         self.exactitud = 0.3
         self.tiempoUltimaPeticionSimu = time()
         self.contador = 1
-        self.datos = None
-        self.acNAO = None
+        self.datos = d
+        self.acNAO = ac
     
     def setDatosCompartidos(self, d):
         self.datos = d

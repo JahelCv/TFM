@@ -8,12 +8,12 @@ CORRIENDO = 1
 PAUSADO = 2 
 
 class ThreadManager():
-    def __init__(self):
+    def __init__(self, d):
         self.hiloExcluyenteCorriendo = None
         self.mutex = Lock()
         self.hilos = {}
         self.hilosExcluyentes = {}
-        self.datosC = None
+        self.datosC = d
         
     def addHilo(self, id, rclass):
         ret = 1
