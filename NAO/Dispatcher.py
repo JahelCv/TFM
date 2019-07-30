@@ -6,9 +6,10 @@ CORRIENDO = 1
 PAUSADO = 2 
 
 class Escenario(Runnable):
-    def __init__(self, d, ac):
+    def __init__(self, d, t, ac):
         super().__init__() 
         self.datos = d
+        self.threadmg = t
         self.acNAO = ac
         
     def setDatosCompartidos(self, d):

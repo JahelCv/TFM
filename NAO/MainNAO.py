@@ -11,11 +11,12 @@ from naoqi import ALBroker
 from naoqi import ALModule
 
 from AccionesNAO import AccionesNAO
-from DatosCompartidos import DatosCompartidos
-from Dispatcher import Dispatcher
-from Escenario import Escenario
-from Interaccion import Interaccion
-from ThreadManager import ThreadManager
+# TODO: Descomentar
+#from DatosCompartidos import DatosCompartidos
+#from Dispatcher import Dispatcher
+#from Escenario import Escenario
+#from Interaccion import Interaccion
+#from ThreadManager import ThreadManager
 
 NAO_IP = "0.0.0.0"
 
@@ -34,20 +35,62 @@ class ServerModule(ALModule):
         self.tts = ALProxy("ALTextToSpeech")
         self.sr = ALProxy("ALSpeechRecognition")
         global memory
-        self.memory = ALProxy("ALMemory")
+        memory = ALProxy("ALMemory")
+        # Deberia ser la ip del robot 127.0.0.1, pero lo quito
+        # porque en los demas ALProxyes no lo pone
+        # self.leds = ALProxy("ALLeds","127.0.0.1",9559)
+        self.leds = ALProxy("ALLeds")
 #        memory.subscribeToEvent("onWordRecognized")
         
         # Inicializo clases
-        self.ac = AccionesNAO(self.tts, self.sr, self.memory)
-        self.dc = DatosCompartidos()
-        self.dc.setData("EXACPALABRA",0.4,False)
-        self.tm = ThreadManager(self.dc)
-        self.disp = Dispatcher(self.dc, self.ac)
-        self.es = Escenario(self.dc, self.ac)
-        self.int = Interaccion(self.dc, self.ac)
-        # TODO: Ver que hago con el TCPServer(...)
-        self.tm.addHiloExcluyente("INTERACCION",self.int)
-        self.tm.addHiloExcluyente("ESCENARIO",self.es)
+        self.ac = AccionesNAO(self.tts, self.sr, self.memory, self.leds)
+        # TODO: DESCOMENTAR
+#        self.dc = DatosCompartidos()
+#        self.dc.setData("EXACPALABRA",0.4,False)
+#        self.tm = ThreadManager(self.dc)
+#        self.disp = Dispatcher(self.dc, self.tm, self.ac)
+#        self.es = Escenario(self.dc, self.ac)
+#        self.int = Interaccion(self.dc, self.ac)
+#        self.tm.addHiloExcluyente("INTERACCION",self.int)
+#        self.tm.addHiloExcluyente("ESCENARIO",self.es)
+#        self.memory.unsubscribeToEvent(self.getName(), "onWordRecognized")
+        time.sleep(1)
+        self.ac.decirFrase("Simulacion lanzada")
+        time.sleep(1)
+        
+        self.ac.setLedsOjosRed(False)
+        self.ac.setLedsOjosGreen(True)
+        self.ac.setLedsOjosBlue(False)
+        
+        #self.memory.subscribeToEvent("WordRecognized",self.getName(), "onWordRecognized")
+#        self.sr.pause(False)
+        self.sr.subscribe("TEST_ASR")
+        self.sr.setLanguage("Spanish")
+        self.sr.setVocabulary(["Me oyes","Si","No","Dime tu glucosa"],False)
+        data = (None, 0)
+        while not data[0]:
+            print str(data)
+            data = memory.getData("WordRecognized")
+        #stops listening after he hears yes or no
+        self.sr.unsubscribe("TEST_ASR")
+#        self.sr.subscribe("TEST_ASR")
+#        time.sleep(20)
+#        data = self.memory.getData("WordRecognized")
+#        print data[0]
+#        self.sr.unsubscribe("TEST_ASR")
+#        try:
+#            # join() algun hilo
+#            while True:
+#                time.sleep(1)
+#        except KeyboardInterrupt:
+#            print
+#            print "Interrupted by user, shutting down"
+#            # myBroker.shutdown()
+#            sys.exit(0)
+            
+        
+        # TODO: Mensaje a GCloud para arrancar el simulador
+        
         # Subscribe to the FaceDetected event:
         
 
@@ -99,6 +142,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
