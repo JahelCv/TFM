@@ -18,32 +18,27 @@ from AccionesNAO import AccionesNAO
 #from Interaccion import Interaccion
 #from ThreadManager import ThreadManager
 
-NAO_IP = "0.0.0.0"
+ip = "andy.local"
 
 # Global variable to store the Server module instance
 Server = None
-memory = None
-
 
 class ServerModule(ALModule):
     def __init__(self, name):
         ALModule.__init__(self, name)
+        self.name = name
         # No need for IP and port here because
         # we have our Python broker connected to NAOqi broker
 
         # Create a proxy to ALTextToSpeech for later use
+#        global memory
+        self.memory = ALProxy("ALMemory")
         self.tts = ALProxy("ALTextToSpeech")
-        self.sr = ALProxy("ALSpeechRecognition")
-        global memory
-        memory = ALProxy("ALMemory")
-        # Deberia ser la ip del robot 127.0.0.1, pero lo quito
-        # porque en los demas ALProxyes no lo pone
-        # self.leds = ALProxy("ALLeds","127.0.0.1",9559)
+        self.asr = ALProxy("ALSpeechRecognition")        
         self.leds = ALProxy("ALLeds")
-#        memory.subscribeToEvent("onWordRecognized")
         
-        # Inicializo clases
-        self.ac = AccionesNAO(self.tts, self.sr, self.memory, self.leds)
+#        # Inicializo clases
+        self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, "Server")
         # TODO: DESCOMENTAR
 #        self.dc = DatosCompartidos()
 #        self.dc.setData("EXACPALABRA",0.4,False)
@@ -53,67 +48,21 @@ class ServerModule(ALModule):
 #        self.int = Interaccion(self.dc, self.ac)
 #        self.tm.addHiloExcluyente("INTERACCION",self.int)
 #        self.tm.addHiloExcluyente("ESCENARIO",self.es)
-#        self.memory.unsubscribeToEvent(self.getName(), "onWordRecognized")
-        time.sleep(1)
-        self.ac.decirFrase("Simulacion lanzada")
-        time.sleep(1)
+#        memory.unsubscribeToEvent(self.getName(), "onWordRecognized")
+        self.ac.decirFrase("Simulacion lanzada, te escucho")
         
-        self.ac.setLedsOjosRed(False)
-        self.ac.setLedsOjosGreen(True)
-        self.ac.setLedsOjosBlue(False)
+#        self.ac.setLedsOjosRed(False)
+#        self.ac.setLedsOjosGreen(True)
+#        self.ac.setLedsOjosBlue(False)
+#        time.sleep(1)
         
-        #self.memory.subscribeToEvent("WordRecognized",self.getName(), "onWordRecognized")
-#        self.sr.pause(False)
-        self.sr.subscribe("TEST_ASR")
-        self.sr.setLanguage("Spanish")
-        self.sr.setVocabulary(["Me oyes","Si","No","Dime tu glucosa"],False)
-        data = (None, 0)
-        while not data[0]:
-            print str(data)
-            data = memory.getData("WordRecognized")
-        #stops listening after he hears yes or no
-        self.sr.unsubscribe("TEST_ASR")
-#        self.sr.subscribe("TEST_ASR")
-#        time.sleep(20)
-#        data = self.memory.getData("WordRecognized")
-#        print data[0]
-#        self.sr.unsubscribe("TEST_ASR")
-#        try:
-#            # join() algun hilo
-#            while True:
-#                time.sleep(1)
-#        except KeyboardInterrupt:
-#            print
-#            print "Interrupted by user, shutting down"
-#            # myBroker.shutdown()
-#            sys.exit(0)
-            
-        
-        # TODO: Mensaje a GCloud para arrancar el simulador
-        
-        # Subscribe to the FaceDetected event:
-        
-
-#    def onSpeechRecognized(self, *_args):
-#        """ This will be called each time a face is
-#        detected.
-#
-#        """
-#        # Unsubscribe to the event when talking,
-#        # to avoid repetitions
-#        memory.unsubscribeToEvent("FaceDetected",
-#            "HumanGreeter")
-#
-#        self.tts.say("Hello, you")
-#
-#        # Subscribe again to the event
-#        memory.subscribeToEvent("FaceDetected",
-#            "HumanGreeter",
-#            "onFaceDetected")
+#        self.asr.subscribe("Server")
+#        self.memory.subscribeToEvent("WordRecognized", "Server", "onWordRecognized")
+#        
+#        self.asr.pause(False)
     
     def onWordRecognized(self, key, value, message):
         self.ac.palabraReconocida(value[0], value[1])
-
 
 def main():
     # We need this broker to be able to construct
@@ -122,7 +71,7 @@ def main():
     myBroker = ALBroker("myBroker",
        "0.0.0.0",   # listen to anyone
        0,           # find a free port and use it
-       NAO_IP,         # parent broker IP
+       ip,         # parent broker IP
        9559)       # parent broker port
 
     # Warning: HumanGreeter must be a global variable
@@ -132,11 +81,17 @@ def main():
     Server = ServerModule("Server")
 
     try:
+        # Inicializo clases
+        (ret, p, e) = Server.ac.esperarPalabra(["Me oyes","Si","No","Dime tu glucosa"], 15)
+        print 'MAIN(Ret = '+str(ret)+'): Se obtiene palabra: ' + str(p) + ' con exactitud: ' + str(e)
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print
         print "Interrupted by user, shutting down"
+        Server.asr.pause(True)
+        if Server.ac.isWaitingWord:
+            Server.memory.unsubscribeToEvent("WordRecognized", "Server")
+            Server.asr.unsubscribe("Server")
         myBroker.shutdown()
         sys.exit(0)
 

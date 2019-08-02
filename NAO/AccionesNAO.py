@@ -5,16 +5,20 @@ Created on Mon Jul 29 20:15:01 2019
 @author: Jahel
 """
 from threading import Lock, Condition
+import time
 
 class AccionesNAO():
-    def __init__(self, proxytts, proxysr, proxymem, proxyleds):
+    def __init__(self, proxytts, proxysr, proxymem, proxyleds, parentname):
+        self.nombreModuloPadre = parentname
         self.mutex = Lock()
         self.mutHablar = Lock()
         self.cond = Condition()
         # TODO: Borrar
         print 'Acciones NAO creado'
         self.tts = proxytts
-        self.sr = proxysr
+        self.asr = proxysr
+        self.asr.pause(True)
+        self.asr.setLanguage("Spanish")
         self.mem = proxymem
         self.leds = proxyleds
         self.configurarGruposLeds()
@@ -26,13 +30,56 @@ class AccionesNAO():
         self.exact = -1
         self.palabra = None
         
+    def esperarPalabra(self, wordlist, seconds):
+        # Se arranca la callback para que recoja self.palabra y self.exactitud
+        if not self.isWaitingWord:
+            try:
+                self.isWaitingWord = True
+                self.palabra = None
+                self.leds.on("EarLeds")
+                self.asr.setVocabulary(wordlist,False)
+                self.asr.subscribe(self.nombreModuloPadre)
+                self.mem.subscribeToEvent("WordRecognized", self.nombreModuloPadre, "onWordRecognized")
+                self.asr.pause(False)
+            except Exception:
+                self.palabra = None
+                self.isWaitingWord = False
+        # Esperamos con el condition a que haya una respuesta
+        # Si self.palabra = None es porque ha vencido el timeout
+        # Si self.palabra != None es porque palabraReconocida ha enviado notifyAll()
+        self.cond.acquire()
+        self.cond.wait(seconds)
+        self.cond.release()
+        if self.palabra != None:
+            if self.palabra == "PARADA_OBLIGADA":
+                self.isWaitingWord = False
+                self.leds.off("EarLeds")
+                self.asr.pause(True)
+                self.mem.unsubscribeToEvent("WordRecognized", self.nombreModuloPadre)
+                self.asr.unsubscribe(self.nombreModuloPadre)
+                return (-1, None, None)
+        else:
+            self.isWaitingWord = False
+            self.leds.off("EarLeds")
+            self.asr.pause(True)
+            self.mem.unsubscribeToEvent("WordRecognized", self.nombreModuloPadre)
+            self.asr.unsubscribe(self.nombreModuloPadre)
+            return (-1, None, None)
+        
+        self.isWaitingWord = False
+        self.leds.off("EarLeds")
+        self.asr.pause(True)
+        self.mem.unsubscribeToEvent("WordRecognized", self.nombreModuloPadre)
+        self.asr.unsubscribe(self.nombreModuloPadre)
+        return (1, self.exact, self.palabra)
+        
     def palabraReconocida(self, p, e):
         self.mutex.acquire()
         if self.isWaitingWord and (not self.isTalking):
             self.isWaitingWord = False
             self.exact = e
-            self.palabra = self.palabra + p
-            print 'Palabra reconocida: ' + self.palabra
+            self.palabra = p
+            print 'Palabra reconocida: ' + str(self.palabra)
             self.cond.acquire()
             self.cond.notifyAll()
             self.cond.release()
