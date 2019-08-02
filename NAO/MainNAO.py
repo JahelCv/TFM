@@ -11,6 +11,7 @@ from naoqi import ALBroker
 from naoqi import ALModule
 
 from AccionesNAO import AccionesNAO
+from Ejemplo import Ejemplo
 # TODO: Descomentar
 #from DatosCompartidos import DatosCompartidos
 #from Dispatcher import Dispatcher
@@ -36,9 +37,14 @@ class ServerModule(ALModule):
         self.tts = ALProxy("ALTextToSpeech")
         self.asr = ALProxy("ALSpeechRecognition")        
         self.leds = ALProxy("ALLeds")
+        self.postureProxy = ALProxy("ALRobotPosture")
+        self.motionProxy = ALProxy("ALMotion")
+        self.autmov = ALProxy("ALAutonomousMoves")
+        self.aspeech = ALProxy("ALAnimatedSpeech")
         
 #        # Inicializo clases
-        self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, "Server")
+        self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, self.postureProxy, 
+                              self.motionProxy, self.autmov, self.aspeech, "Server")        
         # TODO: DESCOMENTAR
 #        self.dc = DatosCompartidos()
 #        self.dc.setData("EXACPALABRA",0.4,False)
@@ -49,7 +55,7 @@ class ServerModule(ALModule):
 #        self.tm.addHiloExcluyente("INTERACCION",self.int)
 #        self.tm.addHiloExcluyente("ESCENARIO",self.es)
 #        memory.unsubscribeToEvent(self.getName(), "onWordRecognized")
-        self.ac.decirFrase("Simulacion lanzada, te escucho")
+        self.ac.decirFrase("Hola mamá")
         
 #        self.ac.setLedsOjosRed(False)
 #        self.ac.setLedsOjosGreen(True)
@@ -82,8 +88,11 @@ def main():
 
     try:
         # Inicializo clases
-        (ret, p, e) = Server.ac.esperarPalabra(["Me oyes","Si","No","Dime tu glucosa"], 15)
-        print 'MAIN(Ret = '+str(ret)+'): Se obtiene palabra: ' + str(p) + ' con exactitud: ' + str(e)
+#        (ret, p, e) = Server.ac.esperarPalabra(["Me oyes","Si","No","Dime tu glucosa"], 15)
+#        print 'MAIN(Ret = '+str(ret)+'): Se obtiene palabra: ' + str(p) + ' con exactitud: ' + str(e)
+        Server.ac.posicionParada()
+#        time.sleep(2)        
+#        Server.ac.accionLevantarse()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
