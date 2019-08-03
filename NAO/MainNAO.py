@@ -91,7 +91,7 @@ def main():
         t.start()
         while True:
             print 'Glucosa actual: ' + str(Server.simremoto.getGlucosaRemoto())
-            time.sleep(1)
+            time.sleep(2)
     except KeyboardInterrupt:
         print "Interrupted by user, shutting down"
         Server.asr.pause(True)

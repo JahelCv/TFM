@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import requests
+from threading import Lock
 
 class SimuladorRemoto:
     def __init__(self):
+        self.mutex = Lock()
         self.urlroot = "http://34.77.125.204:80/"
         self.urlmod = "http://34.77.125.204:80/ModoSimulador/"
         self.urlglu = "http://34.77.125.204:80/Glucosa/"
@@ -13,24 +15,34 @@ class SimuladorRemoto:
         self.urldespausa = "http://34.77.125.204:80/DespausaHilo/"
     
     def getGlucosaRemoto(self):
+        self.mutex.acquire()
         r = requests.get(self.urlglu)
+        self.mutex.release()
         return float(r.content)
         
     def arrancaSimuladorRemoto(self):
+        self.mutex.acquire()
         r = requests.get(self.urlarranca)
+        self.mutex.release()
         return r.content
         
     def pausaSimuladorRemoto(self):
+        self.mutex.acquire()
         r = requests.get(self.urlpausa)
+        self.mutex.release()
         return r.content
         
     def paraSimuladorRemoto(self):
+        self.mutex.acquire()
         r = requests.get(self.urlpara)
+        self.mutex.release()
         return r.content
     
     def enviaDatosSimulacion(self, b, c, e, e0, e1, e2):
+        self.mutex.acquire()
         r = requests.put(self.urldats, json={'bolus' : b, 'cho' : c, 
                 'ejercicio' : e, 'exercise' : [e0,e1,e2]})
+        self.mutex.release()
         if r.ok:
             return True
         else:
