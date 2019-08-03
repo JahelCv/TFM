@@ -1,29 +1,11 @@
 from multiprocessing import Lock
 
-# Datos del simulador
-class DatosSimulador():
-    def __init__(self):
-        self.bolus = 0
-        self.cho = 0
-        self.ejercicioTiempo = 0
-        self.ejercicioIntesidad = 0
-        self.ejercicioDuracion = 0
-        self.ejercicio = False
-        
-    def setDatosSimulacion(self,bolus,cho,ejercicio,ejTiempo,ejIntesidad,ejDuracion):
-        self.bolus = bolus
-        self.cho = cho
-        self.ejercicioTiempo = ejTiempo
-        self.ejercicioIntesidad = ejIntesidad
-        self.ejercicioDuracion = ejDuracion
-        self.ejercicio = ejercicio
-        
-# Clase principal de compartidos
 class DatosCompartidos():
     def __init__(self):
         self.mutex = Lock()
         self.mutexsim = Lock()
-        self.datosSim = DatosSimulador()
+        self.datosSim = {'bolus' : 0.0, 'cho' : 0, 'ejercicio' : False,
+                         'exercise' : [0,0,0]}
         # Diccionario o map
         self.datos = {}
         # Lista o vector
@@ -75,12 +57,17 @@ class DatosCompartidos():
     # Sobre datos de simulacion
     def setDatosSimulacion(self,bolus,cho,ejercicio,ejTiempo,ejIntesidad,ejDuracion):
         self.mutexsim.acquire()
-        self.datosSim.setDatosSimulacion(bolus,cho,ejercicio,ejTiempo,ejIntesidad,ejDuracion)
+        self.datosSim['bolus'] = bolus
+        self.datosSim['cho'] = cho
+        self.datosSim['ejercicio'] = False
+        # exercise = ejerciciotiempo, ejercicioIntesidad, ejercicioDuracion
+        self.datosSim['exercise'] = [ejTiempo,ejIntesidad,ejDuracion]
         self.mutexsim.release()
         
     def getDatosSimulacion(self):
         self.mutexsim.acquire()
         aux = self.datosSim
-        self.datosSim.setDatosSimulacion(0,0,False,0,0,0)
+        self.datosSim = {'bolus' : 0.0, 'cho' : 0, 'ejercicio' : False,
+                         'exercise' : [0,0,0]}
         self.mutexsim.release()
         return aux

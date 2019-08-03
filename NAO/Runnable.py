@@ -26,10 +26,10 @@ class Runnable(object):
         print 'Run - El del Runnable'
         
     def pausar(self):
-        print 'Pausar: Se despausa'
+        print '# Runnable # Pausar: No implementado'
     
     def desPausar(self):
-        print 'DesPausar - El del Runnable '
+        print '# Runnable # DesPausar: No implementado'
         
     def pararThread(self):
         print 'PararThread - El del Runnable'

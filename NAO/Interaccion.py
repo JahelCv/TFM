@@ -1,6 +1,6 @@
 ﻿from Runnable import Runnable
 from collections import deque
-from AccionesComunicaNAO import AccionesComunicaNAO
+from AccionesNAO import AccionesNAO
 from DatosCompartidos import DatosCompartidos
 import random
 from time import time
@@ -16,7 +16,7 @@ class Interaccion(Runnable):
         self.datos = d
         self.glucosa = deque((-1, -1, -1, -1, -1))
         self.contador = 1
-        self.wordlist = deque()
+        self.wordlist = list()
         self.ultimaPalabra = None
         self.ultimaPostura = None
 
@@ -24,13 +24,6 @@ class Interaccion(Runnable):
         self.contador = self.contador + 1
         if self.contador == 5:
             self.contador = 1
-    
-    
-    #def doubleToString(self, aux):    std.stringstream stream
-    #    stream << std.fixed << std.setprecision(2) << aux
-    #    s = stream.str()
-    #    return s
-    
     
     def setDatosCompartidos(self, datos):    
         if datos != None:        
@@ -223,14 +216,6 @@ class Interaccion(Runnable):
             self.datos.deleteData("INTERACCION")
     
     def populateWordList(self):
-        wordlist.push_back("hola")
-        wordlist.push_back("adios")
-        wordlist.push_back("como te llamas")
-        wordlist.push_back("que tal estás")
-        wordlist.push_back("sientate")
-        wordlist.push_back("levantate")
-        wordlist.push_back("choca el puño")
-        wordlist.push_back("salta")
-        wordlist.push_back("tumbate")
-        wordlist.push_back("dime tu glucosa")
-    
+        self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",
+                         "sientate", "levantate", "choca el puño", "salta",
+                         "tumbate", "dime tu glucosa"]

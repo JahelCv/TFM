@@ -5,17 +5,18 @@
 
 import sys
 import time
+from threading import Thread
 
 from naoqi import ALProxy
 from naoqi import ALBroker
 from naoqi import ALModule
 
 from AccionesNAO import AccionesNAO
-from Ejemplo import Ejemplo
 # TODO: Descomentar
-#from DatosCompartidos import DatosCompartidos
+from DatosCompartidos import DatosCompartidos
+from SimuladorRemoto import SimuladorRemoto
 #from Dispatcher import Dispatcher
-#from Escenario import Escenario
+from Escenario import Escenario
 #from Interaccion import Interaccion
 #from ThreadManager import ThreadManager
 
@@ -31,8 +32,6 @@ class ServerModule(ALModule):
         # No need for IP and port here because
         # we have our Python broker connected to NAOqi broker
 
-        # Create a proxy to ALTextToSpeech for later use
-#        global memory
         self.memory = ALProxy("ALMemory")
         self.tts = ALProxy("ALTextToSpeech")
         self.asr = ALProxy("ALSpeechRecognition")        
@@ -42,30 +41,31 @@ class ServerModule(ALModule):
         self.autmov = ALProxy("ALAutonomousMoves")
         self.aspeech = ALProxy("ALAnimatedSpeech")
         
-#        # Inicializo clases
-        self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, self.postureProxy, 
-                              self.motionProxy, self.autmov, self.aspeech, "Server")        
-        # TODO: DESCOMENTAR
-#        self.dc = DatosCompartidos()
-#        self.dc.setData("EXACPALABRA",0.4,False)
-#        self.tm = ThreadManager(self.dc)
-#        self.disp = Dispatcher(self.dc, self.tm, self.ac)
-#        self.es = Escenario(self.dc, self.ac)
-#        self.int = Interaccion(self.dc, self.ac)
-#        self.tm.addHiloExcluyente("INTERACCION",self.int)
-#        self.tm.addHiloExcluyente("ESCENARIO",self.es)
-#        memory.unsubscribeToEvent(self.getName(), "onWordRecognized")
-        self.ac.decirFrase("Cargo proxies exitosamente")
+        # Inicializo clases
+        self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, 
+                              self.postureProxy, self.motionProxy, self.autmov, 
+                              self.aspeech, "Server")      
+        self.ac.decirFrase("Creo proxies exitosamente")        
+        self.ac.setLedsOjosRed(False)
+        self.ac.setLedsOjosGreen(True)
+        self.ac.setLedsOjosBlue(False)
         
-#        self.ac.setLedsOjosRed(False)
-#        self.ac.setLedsOjosGreen(True)
-#        self.ac.setLedsOjosBlue(False)
-#        time.sleep(1)
+        # Creo conexion con simulador 
+        self.simremoto = SimuladorRemoto()
         
-#        self.asr.subscribe("Server")
-#        self.memory.subscribeToEvent("WordRecognized", "Server", "onWordRecognized")
-#        
-#        self.asr.pause(False)
+        # Lanza hilo en remoto
+        if self.simremoto.arrancaSimuladorRemoto():
+            self.ac.decirFrase('Se ha arrancado el simulador en remoto')
+        else:
+            self.ac.decirFrase('Error arrancando el simulador en remoto')
+            
+        # DatosCompartidos tendrá un mejor uso más adelante
+        # Se puede fusionar con ThreadManager
+        self.dc = DatosCompartidos()
+        self.dc.setData("EXACPALABRA",0.4,False)
+        
+        # El que interactua de verdad con el usuario
+        self.es = Escenario(self.dc, self.ac, self.simremoto)
     
     def onWordRecognized(self, key, value, message):
         self.ac.palabraReconocida(value[0], value[1])
@@ -87,23 +87,10 @@ def main():
     Server = ServerModule("Server")
 
     try:
-        # Inicializo clases
-#        (ret, p, e) = Server.ac.esperarPalabra(["Me oyes","Si","No","Dime tu glucosa"], 15)
-#        print 'MAIN(Ret = '+str(ret)+'): Se obtiene palabra: ' + str(p) + ' con exactitud: ' + str(e)
-        Server.ac.decirFrase("Accion quetalestás.")
-        Server.ac.accionQUETALESTAS(1)
-        time.sleep(5)   
-        Server.ac.decirFrase("Acción despedida.")
-        Server.ac.accionDespedida(1)
-        time.sleep(2)
-        Server.ac.decirFrase("Acción saludo.")
-        Server.ac.accionSaludo(1)
-        time.sleep(2)
-        Server.ac.decirFrase("Acción comer.")
-        Server.ac.accionComer()
-        time.sleep(2)
-#        Server.ac.accionLevantarse()
+        t = Thread(target = Server.es.run)
+        t.start()
         while True:
+            print 'Glucosa actual: ' + str(Server.simremoto.getGlucosaRemoto())
             time.sleep(1)
     except KeyboardInterrupt:
         print "Interrupted by user, shutting down"

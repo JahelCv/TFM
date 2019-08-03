@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from DatosCompartidos import DatosCompartidos
-from AccionesComunicaNAO import AccionesComunicaNAO
+from AccionesNAO import AccionesNAO
+from SimuladorRemoto import SimuladorRemoto
 from collections import deque
 from time import time
 import random
@@ -11,7 +12,7 @@ CORRIENDO = 1
 PAUSADO = 2 
 
 class Escenario(Runnable):
-    def __init__(self, d, ac):
+    def __init__(self, d, ac, r):
         super().__init__()        
         self.pausa = False
         self.glucosa = deque((-1, -1, -1, -1, -1))
@@ -20,6 +21,7 @@ class Escenario(Runnable):
         self.contador = 1
         self.datos = d
         self.acNAO = ac
+        self.simremoto = r
     
     def setDatosCompartidos(self, d):
         self.datos = d
@@ -27,26 +29,18 @@ class Escenario(Runnable):
     def setAccionesNAO(self, ac):
         self.acNAO = ac
         
-    def guardarGlucosa(self, glu):
-        # insertamos nuevo
-        self.glucosa.appendleft(glu)
-        # quitamos antiguo
-        self.glucosa.pop()
+    def setSimuladorRemoto(self, r):
+        self.simremoto = r
         
     def mirarGlucosa(self):
-        glucosaAux = self.datos.getData("GLUCOSA")
-        self.guardarGlucosa(glucosaAux)
+        glucosaAux = self.simremoto.getGlucosaRemoto()
+        self.glucosa.appendleft(glucosaAux)
+        self.glucosa.pop()
         return glucosaAux
         
     def pararThread(self):
         self.pararLoop = False
         self.acNAO.pararEsperaPalabra()
-    
-    def pausar(self):
-        self.pausa = True
-        
-    def desPausar(self):
-        self.pausa = False
         
     def actualizarContador(self):
         self.contador = self.contador + 1
@@ -54,36 +48,21 @@ class Escenario(Runnable):
             self.contador = 1
     
     def getWordlistFase2(self):
-        return deque(('vamos a hacer deporte', 'tienes hambre', 'avanza', 'dime tu glucosa', 'avanza'))
+        return ['vamos a hacer deporte', 'tienes hambre', 'avanza', 
+                'dime tu glucosa', 'avanza']
         
     def getWordlistFase3(self):
-        auxlist = deque()
         if self.estado == 1:
-            auxlist.append('hola')
-            auxlist.append('adios')
-            auxlist.append('como te llamas')
-            auxlist.append('que tal estás')
-            auxlist.append('sientate')
-            auxlist.append('levantate')
-            auxlist.append('choca el puño')
-            auxlist.append('salta')
-            auxlist.append('tumbate')
-            auxlist.append('toma un zumo')
-            auxlist.append('come un bocata')
-            auxlist.append('come un pizza')
-            auxlist.append('haz deporte')
+            return ['hola','adios','como te llamas','que tal estás','sientate',
+                    'levantate','choca el puño','salta','tumbate''toma un zumo',
+                    'come un bocata','come un pizza','haz deporte',
+                    'dime tu glucosa','avanza']
         elif self.estado == 2:
-            auxlist.append('si')
-            auxlist.append('no')
+            return ['si','no','dime tu glucosa','avanza']            
         elif self.estado == 3:
-            auxlist.append('toma un zumo')
-            auxlist.append('come un bocata')
-            auxlist.append('come una pizza')
-            auxlist.append('haz deporte')
-        # siempre:
-        auxlist.append('dime tu glucosa')
-        auxlist.append('avanza')
-        return auxlist
+            return ['toma un zumo','come un bocata','come una pizza',
+                    'haz deporte','dime tu glucosa','avanza']
+        return []
         
     def fase3(self):
         cho = 0
@@ -206,7 +185,7 @@ class Escenario(Runnable):
                     cho = 0
                     # bolo prandial = ratio_insulina_carbohidratos * gramos de carbohidratos + factor de corrección*(glucemia actual - glucemia objetivo) - insulina a bordo
                     bolus = (cho/30)+(0.027/6)*(self.glucosa[0]-90)-0;
-                    self.datos.setDatosSimulacion(bolus,cho,False,0,0,0);
+                    self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0);
                     self.tiempoUltimaPeticionSimu = time();
                 
                 # Si no sigue creciendo pero el tiempo que ha pasado es <50 sec
@@ -341,7 +320,7 @@ class Escenario(Runnable):
                         self.acNAO.accionComer()
                         
                     self.estado = 3
-                    self.datos.setDatosSimulacion(bolus,cho,False,0,0,0)
+                    self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time()
                     
                 if palabraRec == 'come un bocata':
@@ -365,7 +344,7 @@ class Escenario(Runnable):
                         self.acNAO.accionComer()
                         
                     self.estado = 3
-                    self.datos.setDatosSimulacion(bolus,cho,False,0,0,0)
+                    self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time()
                     
                 if palabraRec == 'come una pizza':
@@ -389,7 +368,7 @@ class Escenario(Runnable):
                         self.acNAO.accionComer()
                         
                     self.estado = 3
-                    self.datos.setDatosSimulacion(bolus,cho,False,0,0,0)
+                    self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time()
                     
                 if palabraRec == 'haz deporte':
@@ -415,7 +394,7 @@ class Escenario(Runnable):
                     self.acNAO.accionPinchate()
                     self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
                     self.estado = 3
-                    self.datos.setDatosSimulacion(bolus,cho,True,0,50,30)
+                    self.simremoto.enviaDatosSimulacion(bolus,cho,True,0,50,30)
                     self.tiempoUltimaPeticionSimu = time()
                     self.acNAO.accionCorrer()
                     
@@ -431,7 +410,7 @@ class Escenario(Runnable):
                             
                         self.acNAO.decirFrase('Voy a tomarme un sobre de gel de 15 gramos para subir mi glucosa. No puedo permitir que siga tan baja. Si en un rato sigo igual me tomaré otro.')
                         self.acNAO.accionComer();
-                        self.datos.setDatosSimulacion(0,15,False,0,0,0)
+                        self.simremoto.enviaDatosSimulacion(0,15,False,0,0,0)
                         self.tiempoUltimaPeticionSimu = time()
                         self.estado = 3
                         time.sleep(1)
@@ -444,7 +423,7 @@ class Escenario(Runnable):
                         
                         self.acNAO.decirFrase('Voy a inyectarme insulina para bajar mi glucosa. Es lo que realmente debo hacer en estos casos.')
                         self.acNAO.accionPinchate();
-                        self.datos.setDatosSimulacion(1,0,False,0,0,0)
+                        self.simremoto.enviaDatosSimulacion(1,0,False,0,0,0)
                         self.tiempoUltimaPeticionSimu = time()
                         self.estado = 3
                     # Si glucosa normal
@@ -462,7 +441,7 @@ class Escenario(Runnable):
                         
                         self.acNAO.decirFrase('Voy a comerme un bocata para subir mi glucosa. No puedo permitir que siga tan baja.')
                         self.acNAO.accionComer()
-                        self.datos.setDatosSimulacion(0,50,False,0,0,0)
+                        self.simremoto.enviaDatosSimulacion(0,50,False,0,0,0)
                         self.tiempoUltimaPeticionSimu = time()
                         self.estado = 3
                     # Si glucosa alta
@@ -474,7 +453,7 @@ class Escenario(Runnable):
                         
                         self.acNAO.decirFrase('Voy a inyectarme insulina para bajar mi glucosa. Es lo que realmente debo hacer en estos casos.')
                         self.acNAO.accionPinchate()
-                        self.datos.setDatosSimulacion(1,0,False,0,0,0)
+                        self.simremoto.enviaDatosSimulacion(1,0,False,0,0,0)
                         self.tiempoUltimaPeticionSimu = time()
                         self.estado = 3
                     # Si glucosa normal
@@ -532,7 +511,7 @@ class Escenario(Runnable):
                 self.acNAO.accionMedirGlucosa()
                 self.acNAO.decirFrase('Ahora mismo tengo ' + str(self.mirarGlucosa()))
                 self.acNAO.decirFrase('Voy a tomarme un zumo para subir mi glucosa. No puedo permitir que siga tan baja. Si en un rato sigo igual me tomaré otro.')
-                self.datos.setDatosSimulacion(0,15,False,0,0,0)
+                self.simremoto.enviaDatosSimulacion(0,15,False,0,0,0)
                 self.acNAO.accionComer()
                 self.estadotaller = 2
             elif self.estadotaller == 2 or self.estadotaller == 4:
@@ -542,7 +521,7 @@ class Escenario(Runnable):
                 self.acNAO.accionMedirGlucosa()
                 self.acNAO.decirFrase('Ahora mismo tengo ' + str(self.mirarGlucosa()))
                 self.acNAO.decirFrase('Voy a tomarme un zumo para subir mi glucosa. No puedo permitir que siga tan baja. Si en un rato sigo igual me tomaré otro.')
-                self.datos.setDatosSimulacion(0,15,False,0,0,0)
+                self.simremoto.enviaDatosSimulacion(0,15,False,0,0,0)
                 self.acNAO.accionComer()
                 self.acNAO.decirFrase('No he sido previsor, y el bolo de insulina que me he puesto antes de comer ha sido demasiado grande al hacer ahora ejercicio. Otra vez, debería ponerme menos si voy a hacer deporte después.')
                 self.estadotaller = 4
@@ -570,7 +549,7 @@ class Escenario(Runnable):
                     self.ultimaPalabra = 'vamos a hacer deporte'
                     if self.numEjercicio == 1:
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
-                        self.datos.setself.datosSimulacion(0,0,True,0,50,60)
+                        self.simremoto.enviaDatosSimulacion(0,0,True,0,50,60)
                         self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Uff... Estoy agotado.')
                         self.numEjercicio = self.numEjercicio + 1
@@ -580,7 +559,7 @@ class Escenario(Runnable):
                         self.acNAO.decirFrase('Como mi glucosa es menor de 150 voy a comerme un snack para que no me baje tanto la glucosa durante el ejercicio.')
                         self.acNAO.accionComer()
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
-                        self.datos.datosSimulacion(0,15,True,30,50,60)
+                        self.simremoto.enviaDatosSimulacion(0,15,True,30,50,60)
                         self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte, me siento bien.')
                         self.numEjercicio = self.numEjercicio + 1
@@ -599,7 +578,7 @@ class Escenario(Runnable):
                         	cho = 0
                         	
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
-                        self.datos.setself.datosSimulacion(0,cho,True,30,50,60)
+                        self.simremoto.enviaDatosSimulacion(0,cho,True,30,50,60)
                         self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte.')
                         self.numEjercicio = self.numEjercicio + 1
@@ -621,7 +600,7 @@ class Escenario(Runnable):
                         self.acNAO.accionPinchate()
                         self.acNAO.accionComer()
                         self.acNAO.decirFrase('Se me hace tarde, la clase de gimnasia empieza ahora.')
-                        self.datos.setself.datosSimulacion(bolus,cho,True,120,50,60)
+                        self.simremoto.enviaDatosSimulacion(bolus,cho,True,120,50,60)
                         self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte.')
                         self.numHambre = 0
@@ -643,7 +622,7 @@ class Escenario(Runnable):
                         self.acNAO.decirFrase('Ahora voy a comer.')
                         self.acNAO.accionComer()
                         self.acNAO.decirFrase('Se me hace tarde, la clase de gimnasia empieza ahora.')
-                        self.datos.setself.datosSimulacion(bolus,cho,True,120,50,60)
+                        self.simremoto.enviaDatosSimulacion(bolus,cho,True,120,50,60)
                         self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte. Me siento genial.')
                     else:
