@@ -5,10 +5,6 @@ import time
 import sys
 from threading import Lock, Condition
 
-#PARADO = 0
-#CORRIENDO = 1
-#PAUSADO = 2 
-
 class Simulador(object):
     def __init__(self):
         self.mutex= Lock()        
@@ -31,6 +27,8 @@ class Simulador(object):
         self.exercise = list([0,0,0])
         self.flagThread = True
         self.flagPausa = False
+        # self.estadoHilo = "PARADO", "CORRIENDO", "PAUSADO"
+        self.estadoHilo = "PARADO"
     
         self.t = []
         self.x = []
@@ -82,6 +80,7 @@ class Simulador(object):
         print('Run(): Arrancamos', file=sys.stdout)
         try:
             self.mutex.acquire()
+            self.estadoHilo = "CORRIENDO"
             self.ConfigurarSimulador()
             print('Run(): Antes de simular() inicial', file=sys.stdout)
             self.simular()
@@ -159,6 +158,12 @@ class Simulador(object):
         self.mutex.release()
         return ret
         
+    def getEstadoHilo(self):
+        self.mutex.acquire()
+        ret = self.estadoHilo
+        self.mutex.release()
+        return ret
+        
     def setGlucosa(self, glucosa):
         self.mutex.acquire()
         self.glucosa = float(glucosa)
@@ -174,18 +179,21 @@ class Simulador(object):
     def pararSimulador(self):
         self.mutex.acquire()
         self.flagThread = False
+        self.estadoHilo = "PARADO"
         self.mutex.release()
         return True
         
     def pausarSimulador(self):
         self.mutex.acquire()
         self.flagPausa = True
+        self.estadoHilo = "PAUSADO"
         self.mutex.release()
         return True
         
     def despausarSimulador(self):
         self.cv.acquire()
         self.cv.notifyAll()
+        self.estadoHilo = "CORRIENDO"
         self.cv.release()
         return True
         

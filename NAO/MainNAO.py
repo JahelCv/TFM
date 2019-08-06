@@ -15,7 +15,7 @@ from AccionesNAO import AccionesNAO
 # TODO: Descomentar
 from DatosCompartidos import DatosCompartidos
 from SimuladorRemoto import SimuladorRemoto
-#from Dispatcher import Dispatcher
+from DispatchGCloud import DispatchGCloud
 from Escenario import Escenario
 #from Interaccion import Interaccion
 #from ThreadManager import ThreadManager
@@ -66,6 +66,9 @@ class ServerModule(ALModule):
         
         # El que interactua de verdad con el usuario
         self.es = Escenario(self.dc, self.ac, self.simremoto)
+        
+        # Crea el que atiende a los subscriptores
+        self.dgc = DispatchGCloud(self.ac)
     
     def onWordRecognized(self, key, value, message):
         self.ac.palabraReconocida(value[0], value[1])

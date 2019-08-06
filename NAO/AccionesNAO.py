@@ -12,6 +12,7 @@ class AccionesNAO():
                  proxymotion, proxyautomov, proxyaspeech, parentname):
         self.nombreModuloPadre = parentname
         self.mutex = Lock()
+        self.mutBlock = Lock()
         self.mutHablar = Lock()
         self.mutexAcciones = Lock()
         self.cond = Condition()
@@ -34,6 +35,17 @@ class AccionesNAO():
         self.isThreadBlock = False
         self.exact = -1
         self.palabra = None
+
+    def getThreadBlock(self):
+        self.mutBlock.acquire()
+        aux = self.isThreadBlock
+        self.mutBlock.release()
+        return aux
+        
+    def setThreadBlock(self, b):
+        self.mutBlock.acquire()
+        self.isThreadBlock= b
+        self.mutBlock.release()
         
     def getDCMCycleTime(self):
         return self.mem.getData("DCM/CycleTime")
