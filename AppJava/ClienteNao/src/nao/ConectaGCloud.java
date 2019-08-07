@@ -1,6 +1,6 @@
 package nao;
 
-import com.google.api.core.ApiFuture;
+/*import com.google.api.core.ApiFuture;
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.MessageReceiver;
 import com.google.cloud.pubsub.v1.Publisher;
@@ -18,33 +18,37 @@ import com.google.pubsub.v1.ProjectTopicName;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.Subscription;
-import com.google.pubsub.v1.Topic;
+import com.google.pubsub.v1.Topic;*/
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 import ventanas.VentanaControl;
 import ventanas.VentanaVisualizacion;
 
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
+//import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+//import java.io.OutputStream;
+//import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
+//import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.concurrent.TimeUnit;
+//import java.util.concurrent.TimeUnit;
 
-import org.json.JSONArray;
+//import org.json.JSONArray;
 
 public class ConectaGCloud {
 
-	static String projectname = "servernao";
+	static String projectname = "naoproject-249107";
 
 	// Topics para nao pub/sub
 	static String topic_d = "naodecir";
@@ -52,11 +56,15 @@ public class ConectaGCloud {
 	static String topic_h = "naohilos";
 	static String topic_l = "naoleds";
 	static String topic_e = "naoexacpalabra";
-	static ProjectTopicName topic_naodecir = ProjectTopicName.of(projectname, topic_d);
-	static ProjectTopicName topic_naomover = ProjectTopicName.of(projectname, topic_m);
-	static ProjectTopicName topic_naohilos = ProjectTopicName.of(projectname, topic_h);
-	static ProjectTopicName topic_naoleds = ProjectTopicName.of(projectname, topic_l);
-	static ProjectTopicName topic_naoexacpalabra = ProjectTopicName.of(projectname, topic_e);
+	/*
+	 * static ProjectTopicName topic_naodecir = ProjectTopicName.of(projectname,
+	 * topic_d); static ProjectTopicName topic_naomover =
+	 * ProjectTopicName.of(projectname, topic_m); static ProjectTopicName
+	 * topic_naohilos = ProjectTopicName.of(projectname, topic_h); static
+	 * ProjectTopicName topic_naoleds = ProjectTopicName.of(projectname, topic_l);
+	 * static ProjectTopicName topic_naoexacpalabra =
+	 * ProjectTopicName.of(projectname, topic_e);
+	 */
 
 	// Rutas para el simulador del GCE
 	String urlmod = "ModoSimulador/";
@@ -68,50 +76,29 @@ public class ConectaGCloud {
 	String urldespausa = "DespausaHilo/";
 	String urlestadohilo = "EstadoHilo/";
 
+	MqttClient mqttc;
+
 	private String gce_rootip = null;
 
 	private VentanaVisualizacion vv;
 	private VentanaControl vc;
 
-	Subscriber subscriber_esc = null;
-	Subscriber subscriber_int = null;
-	Subscriber subscriber_glu = null;
-	Subscriber subscriber_hil = null;
-	Subscriber subscriber_res = null;
+	/*
+	 * Subscriber subscriber_esc = null; Subscriber subscriber_int = null;
+	 * Subscriber subscriber_glu = null; Subscriber subscriber_hil = null;
+	 * Subscriber subscriber_res = null;
+	 */
 
 	public ConectaGCloud(String ip) {
-		// Verifica que existen los topics
-		if (!this.existsTopic(topic_naodecir)) {
-			this.createTopic(topic_naodecir);
+		try {
+			mqttc = new MqttClient("tcp://iot.eclipse.org:1883", "PublicadorJava");
+			System.out.println("Crea mqtt object");
+			mqttc.connect();
+			System.out.println("Conectado exitosamente");
+		} catch (MqttException e) {
+			e.printStackTrace();
 		}
-		if (!this.existsTopic(topic_naomover)) {
-			this.createTopic(topic_naomover);
-		}
-		if (!this.existsTopic(topic_naohilos)) {
-			this.createTopic(topic_naohilos);
-		}
-		if (!this.existsTopic(topic_naoleds)) {
-			this.createTopic(topic_naoleds);
-		}
-		if (!this.existsTopic(topic_naoexacpalabra)) {
-			this.createTopic(topic_naoexacpalabra);
-		}
-		// Verifica que existen las subscripciones
-		/*
-		 * if (!this.existsSubscription(topicescenario, "escenariosub")) {
-		 * this.createSubscription(topicescenario, "escenariosub"); } if
-		 * (!this.existsSubscription(topicinteraccion, "interaccionsub")) {
-		 * this.createSubscription(topicinteraccion, "interaccionsub"); } if
-		 * (!this.existsSubscription(topicglucosa, "glucosasub")) {
-		 * this.createSubscription(topicglucosa, "glucosasub"); } if
-		 * (!this.existsSubscription(topichilos, "hilossub")) {
-		 * this.createSubscription(topichilos, "hilossub"); } if
-		 * (!this.existsSubscription(topicres, "ressub")) {
-		 * this.createSubscription(topicres, "ressub"); } if
-		 * (!this.existsSubscription(topicacciones, "accionessub")) {
-		 * this.createSubscription(topicacciones, "accionessub"); }
-		 */
-		// Establece la IP de la máquina virtual
+
 		gce_rootip = "http://" + ip + ":80/";
 		urlmod = gce_rootip + urlmod;
 		urlglu = gce_rootip + urlglu;
@@ -121,6 +108,15 @@ public class ConectaGCloud {
 		urlpausa = gce_rootip + urlpausa;
 		urldespausa = gce_rootip + urldespausa;
 		urlestadohilo = gce_rootip + urlestadohilo;
+
+	}
+
+	public void desconectarMQTT() {
+		try {
+			mqttc.disconnect();
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void setVentanaVisualizacion(VentanaVisualizacion v) {
@@ -132,285 +128,175 @@ public class ConectaGCloud {
 	}
 
 	/**
-	 * FUNCIONES PARA GOOGLE PUB/SUB
+	 * FUNCIONES PARA MQTT
 	 * 
 	 * @param projectTopicName
 	 */
-	public void createTopic(ProjectTopicName projectTopicName) {
-		try (TopicAdminClient topicAdminClient = TopicAdminClient.create()) {
-			topicAdminClient.createTopic(projectTopicName);
-		} catch (Exception e) {
-			System.err.println("Error al crear un topic: " + e.toString());
+	public void publishMessageNaoDecir(String message) {
+		MqttMessage mq = new MqttMessage();
+		mq.setPayload(message.getBytes());
+		try {
+			mqttc.publish("nao/decir", mq);
+		} catch (MqttPersistenceException e) {
+			e.printStackTrace();
+		} catch (MqttException e) {
+			e.printStackTrace();
 		}
 	}
 
-	public boolean existsTopic(ProjectTopicName projectTopicName) {
-		try (TopicAdminClient topicAdminClient = TopicAdminClient.create()) {
-			ListTopicsRequest listTopicsRequest = ListTopicsRequest.newBuilder()
-					.setProject(ProjectName.format(projectname)).build();
-			ListTopicsPagedResponse response = topicAdminClient.listTopics(listTopicsRequest);
-			Iterable<Topic> topics = response.iterateAll();
-			for (Topic topic : topics) {
-				if (topic.getName().equals(projectTopicName.toString())) {
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			System.err.println("Error al listar topics: " + e.toString());
+	public void publishMessageNaoMover(String message) {
+		MqttMessage mq = new MqttMessage();
+		mq.setPayload(message.getBytes());
+		try {
+			mqttc.publish("nao/mover", mq);
+		} catch (MqttPersistenceException e) {
+			e.printStackTrace();
+		} catch (MqttException e) {
+			e.printStackTrace();
 		}
-		return false;
 	}
 
-	/**
-	 * Publish message to pub/sub en topic naodecir
-	 * 
-	 * @param message
-	 * @return
+	public void publishMessageNaoHilos(String message) {
+		MqttMessage mq = new MqttMessage();
+		mq.setPayload(message.getBytes());
+		try {
+			mqttc.publish("nao/hilos", mq);
+		} catch (MqttPersistenceException e) {
+			e.printStackTrace();
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void publishMessageNaoLeds(String message) {
+		MqttMessage mq = new MqttMessage();
+		mq.setPayload(message.getBytes());
+		try {
+			mqttc.publish("nao/leds", mq);
+		} catch (MqttPersistenceException e) {
+			e.printStackTrace();
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void publishMessageNaoExacpalabra(String message) {
+		MqttMessage mq = new MqttMessage();
+		mq.setPayload(message.getBytes());
+		try {
+			mqttc.publish("nao/exacpalabra", mq);
+		} catch (MqttPersistenceException e) {
+			e.printStackTrace();
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/*
+	 * public boolean existsSubscription(ProjectTopicName topicName, String
+	 * subscriptionId) { String subscriptionId_s =
+	 * (ProjectSubscriptionName.of(projectname, subscriptionId)).toString(); try
+	 * (TopicAdminClient topicAdminClient = TopicAdminClient.create()) {
+	 * ListTopicSubscriptionsRequest request =
+	 * ListTopicSubscriptionsRequest.newBuilder()
+	 * .setTopic(topicName.toString()).build(); ListTopicSubscriptionsPagedResponse
+	 * response = topicAdminClient.listTopicSubscriptions(request); Iterable<String>
+	 * subscriptionNames = response.iterateAll(); for (String subscriptionName :
+	 * subscriptionNames) { // System.out.println("exists subscription: " +
+	 * subscriptionName); if (subscriptionId_s.equals(subscriptionName)) return
+	 * true; } return false; } catch (IOException e) { e.printStackTrace(); return
+	 * false; } return false; }
 	 */
-	public String publishMessageNaoDecir(String message) {
-		Publisher publisher = null;
-		String ret = null;
 
-		try {
-			publisher = Publisher.newBuilder(topic_naodecir).build();
-			ByteString data = ByteString.copyFromUtf8(message);
-			PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-			ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-			// System.out.println("published with message ID: " + messageIdFuture.get());
-			ret = messageIdFuture.get();
-		} catch (Exception e) {
-			// System.err.println("Error al publicar mensaje: " + e.toString());
-			e.printStackTrace();
-			ret = null;
-		}
-		if (publisher != null) {
-			// When finished with the publisher, shutdown to free up resources.
-			publisher.shutdown();
-			try {
-				publisher.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				ret = null;
-			}
-		}
-		return ret;
-	}
-
-	public String publishMessageNaoMover(String message) {
-		Publisher publisher = null;
-		String ret = null;
-		try {
-			publisher = Publisher.newBuilder(topic_naomover).build();
-			ByteString data = ByteString.copyFromUtf8(message);
-			PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-			ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-			// System.out.println("published with message ID: " + messageIdFuture.get());
-			ret = messageIdFuture.get();
-		} catch (Exception e) {
-			System.err.println("Error al publicar mensaje: " + e.toString());
-			ret = null;
-		}
-		if (publisher != null) {
-			// When finished with the publisher, shutdown to free up resources.
-			publisher.shutdown();
-			try {
-				publisher.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				ret = null;
-			}
-		}
-		return ret;
-	}
-
-	public String publishMessageNaoHilos(String message) {
-		Publisher publisher = null;
-		String ret = null;
-		try {
-			publisher = Publisher.newBuilder(topic_naohilos).build();
-			ByteString data = ByteString.copyFromUtf8(message);
-			PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-			ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-			// System.out.println("published with message ID: " + messageIdFuture.get());
-			ret = messageIdFuture.get();
-		} catch (Exception e) {
-			System.err.println("Error al publicar mensaje: " + e.toString());
-			ret = null;
-		}
-		if (publisher != null) {
-			// When finished with the publisher, shutdown to free up resources.
-			publisher.shutdown();
-			try {
-				publisher.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				ret = null;
-			}
-		}
-		return ret;
-	}
-
-	public String publishMessageNaoLeds(String message) {
-		Publisher publisher = null;
-		String ret = null;
-		try {
-			publisher = Publisher.newBuilder(topic_naoleds).build();
-			ByteString data = ByteString.copyFromUtf8(message);
-			PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-			ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-			// System.out.println("published with message ID: " + messageIdFuture.get());
-			ret = messageIdFuture.get();
-		} catch (Exception e) {
-			System.err.println("Error al publicar mensaje: " + e.toString());
-			ret = null;
-		}
-		if (publisher != null) {
-			// When finished with the publisher, shutdown to free up resources.
-			publisher.shutdown();
-			try {
-				publisher.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				ret = null;
-			}
-		}
-		return ret;
-	}
-
-	public String publishMessageNaoExacpalabra(String message) {
-		Publisher publisher = null;
-		String ret = null;
-		try {
-			publisher = Publisher.newBuilder(topic_naoexacpalabra).build();
-			ByteString data = ByteString.copyFromUtf8(message);
-			PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).build();
-			ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);
-			// System.out.println("published with message ID: " + messageIdFuture.get());
-			ret = messageIdFuture.get();
-		} catch (Exception e) {
-			System.err.println("Error al publicar mensaje: " + e.toString());
-			ret = null;
-		}
-		if (publisher != null) {
-			// When finished with the publisher, shutdown to free up resources.
-			publisher.shutdown();
-			try {
-				publisher.awaitTermination(1, TimeUnit.MINUTES);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				ret = null;
-			}
-		}
-		return ret;
-	}
-
-	public boolean existsSubscription(ProjectTopicName topicName, String subscriptionId) {
-		String subscriptionId_s = (ProjectSubscriptionName.of(projectname, subscriptionId)).toString();
-		try (TopicAdminClient topicAdminClient = TopicAdminClient.create()) {
-			ListTopicSubscriptionsRequest request = ListTopicSubscriptionsRequest.newBuilder()
-					.setTopic(topicName.toString()).build();
-			ListTopicSubscriptionsPagedResponse response = topicAdminClient.listTopicSubscriptions(request);
-			Iterable<String> subscriptionNames = response.iterateAll();
-			for (String subscriptionName : subscriptionNames) {
-				// System.out.println("exists subscription: " + subscriptionName);
-				if (subscriptionId_s.equals(subscriptionName))
-					return true;
-			}
-			return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	public Subscription createSubscription(ProjectTopicName topicName, String subscriptionId) {
-		try (SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create()) {
-			ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectname, subscriptionId);
-			// create a pull subscription with default acknowledgement deadline
-			return subscriptionAdminClient.createSubscription(subscriptionName, topicName,
-					PushConfig.getDefaultInstance(), 0);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+	/*
+	 * public void createSubscription(ProjectTopicName topicName, String
+	 * subscriptionId) { try (SubscriptionAdminClient subscriptionAdminClient =
+	 * SubscriptionAdminClient.create()) { ProjectSubscriptionName subscriptionName
+	 * = ProjectSubscriptionName.of(projectname, subscriptionId); // create a pull
+	 * subscription with default acknowledgement deadline return
+	 * subscriptionAdminClient.createSubscription(subscriptionName, topicName,
+	 * PushConfig.getDefaultInstance(), 0); } catch (IOException e) {
+	 * e.printStackTrace(); return null; } }
+	 */
 
 	public void subscribeEscenario(String subs) {
-		ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectname, subs);
-		MessageReceiver receiver = new MessageReceiver() {
-			@Override
-			public void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-				// handle incoming message, then ack/nack the received message
-				System.out.println("Id : " + message.getMessageId());
-				System.out.println("Data : " + message.getData().toStringUtf8());
-				consumer.ack();
-			}
-		};
-		subscriber_esc = Subscriber.newBuilder(subscriptionName, receiver).build();
-		subscriber_esc.startAsync();
+		/*
+		 * ProjectSubscriptionName subscriptionName =
+		 * ProjectSubscriptionName.of(projectname, subs); MessageReceiver receiver = new
+		 * MessageReceiver() {
+		 * 
+		 * @Override public void receiveMessage(PubsubMessage message, AckReplyConsumer
+		 * consumer) { // handle incoming message, then ack/nack the received message
+		 * System.out.println("Id : " + message.getMessageId());
+		 * System.out.println("Data : " + message.getData().toStringUtf8());
+		 * consumer.ack(); } }; subscriber_esc = Subscriber.newBuilder(subscriptionName,
+		 * receiver).build(); subscriber_esc.startAsync();
+		 */
 	}
 
 	public void subscribeInteraccion(String subs) {
-		ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectname, subs);
-		MessageReceiver receiver = new MessageReceiver() {
-			@Override
-			public void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-				// handle incoming message, then ack/nack the received message
-				System.out.println("Id : " + message.getMessageId());
-				System.out.println("Data : " + message.getData().toStringUtf8());
-				consumer.ack();
-			}
-		};
-		subscriber_int = Subscriber.newBuilder(subscriptionName, receiver).build();
-		subscriber_int.startAsync();
+		/*
+		 * ProjectSubscriptionName subscriptionName =
+		 * ProjectSubscriptionName.of(projectname, subs); MessageReceiver receiver = new
+		 * MessageReceiver() {
+		 * 
+		 * @Override public void receiveMessage(PubsubMessage message, AckReplyConsumer
+		 * consumer) { // handle incoming message, then ack/nack the received message
+		 * System.out.println("Id : " + message.getMessageId());
+		 * System.out.println("Data : " + message.getData().toStringUtf8());
+		 * consumer.ack(); } }; subscriber_int = Subscriber.newBuilder(subscriptionName,
+		 * receiver).build(); subscriber_int.startAsync();
+		 */
 	}
 
 	public void subscribeGlucosa(String subs) {
-		ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectname, subs);
-		MessageReceiver receiver = new MessageReceiver() {
-			@Override
-			public void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-				// handle incoming message, then ack/nack the received message
-				System.out.println("Id : " + message.getMessageId());
-				System.out.println("Data : " + message.getData().toStringUtf8());
-				consumer.ack();
-				vv.addDotGraf(Float.parseFloat(message.getData().toStringUtf8()));
-			}
-		};
-		subscriber_glu = Subscriber.newBuilder(subscriptionName, receiver).build();
-		subscriber_glu.startAsync();
+		/*
+		 * ProjectSubscriptionName subscriptionName =
+		 * ProjectSubscriptionName.of(projectname, subs); MessageReceiver receiver = new
+		 * MessageReceiver() {
+		 * 
+		 * @Override public void receiveMessage(PubsubMessage message, AckReplyConsumer
+		 * consumer) { // handle incoming message, then ack/nack the received message
+		 * System.out.println("Id : " + message.getMessageId());
+		 * System.out.println("Data : " + message.getData().toStringUtf8());
+		 * consumer.ack();
+		 * vv.addDotGraf(Float.parseFloat(message.getData().toStringUtf8())); } };
+		 * subscriber_glu = Subscriber.newBuilder(subscriptionName, receiver).build();
+		 * subscriber_glu.startAsync();
+		 */
 	}
 
 	public void subscribeHilos(String subs) {
-		ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectname, subs);
-		MessageReceiver receiver = new MessageReceiver() {
-			@Override
-			public void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-				// handle incoming message, then ack/nack the received message
-				System.out.println("# subscribeHilos # Id : " + message.getMessageId());
-				System.out.println("# subscribeHilos # Data : " + message.getData().toStringUtf8());
-				consumer.ack();
-				// TODO: procesarHilosServidor (Manager)
-			}
-		};
-		subscriber_hil = Subscriber.newBuilder(subscriptionName, receiver).build();
-		subscriber_hil.startAsync();
+		/*
+		 * ProjectSubscriptionName subscriptionName =
+		 * ProjectSubscriptionName.of(projectname, subs); MessageReceiver receiver = new
+		 * MessageReceiver() {
+		 * 
+		 * @Override public void receiveMessage(PubsubMessage message, AckReplyConsumer
+		 * consumer) { // handle incoming message, then ack/nack the received message
+		 * System.out.println("# subscribeHilos # Id : " + message.getMessageId());
+		 * System.out.println("# subscribeHilos # Data : " +
+		 * message.getData().toStringUtf8()); consumer.ack(); // TODO:
+		 * procesarHilosServidor (Manager) } }; subscriber_hil =
+		 * Subscriber.newBuilder(subscriptionName, receiver).build();
+		 * subscriber_hil.startAsync();
+		 */
 	}
 
 	public void subscribeRes(String subs) {
-		ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(projectname, subs);
-		MessageReceiver receiver = new MessageReceiver() {
-			@Override
-			public void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-				// handle incoming message, then ack/nack the received message
-				System.out.println("Id : " + message.getMessageId());
-				System.out.println("Data : " + message.getData().toStringUtf8());
-				consumer.ack();
-				vc.addTextPane(message.getData().toStringUtf8());
-			}
-		};
-		subscriber_res = Subscriber.newBuilder(subscriptionName, receiver).build();
-		subscriber_res.startAsync();
+		/*
+		 * ProjectSubscriptionName subscriptionName =
+		 * ProjectSubscriptionName.of(projectname, subs); MessageReceiver receiver = new
+		 * MessageReceiver() {
+		 * 
+		 * @Override public void receiveMessage(PubsubMessage message, AckReplyConsumer
+		 * consumer) { // handle incoming message, then ack/nack the received message
+		 * System.out.println("Id : " + message.getMessageId());
+		 * System.out.println("Data : " + message.getData().toStringUtf8());
+		 * consumer.ack(); vc.addTextPane(message.getData().toStringUtf8()); } };
+		 * subscriber_res = Subscriber.newBuilder(subscriptionName, receiver).build();
+		 * subscriber_res.startAsync();
+		 */
 	}
 
 	/**
@@ -529,7 +415,7 @@ public class ConectaGCloud {
 		}
 		return ret;
 	}
-	
+
 	public String GETEstadoHiloSimulador_GCE() {
 		HttpURLConnection con = null;
 		String ret = null;
@@ -567,11 +453,15 @@ public class ConectaGCloud {
 		HttpURLConnection httpCon = null;
 		boolean ret = false;
 		String urlParameters = "";
-		String json = "{\'bolus\' : "+bolus+", \'cho\' : "+cho+", \'ejercicio\' :"+ejer
-						+", \'exercise\' : ["+ejerT+","+ejerD+","+ejerI+"]}";
-		//String json = "{\'bolus\' : "+bolus+", \'cho\' : "+cho+", \'ejercicio\' : "+ejer+"}";
-		/*String json = "{ \"data\": { \"bolus\" : " + bolus + ", \"cho\" : " + cho + ", \"ejercicio\" : " + aux
-				+ ", \"exercise\" : [" + ejerT + "," + ejerD + "," + ejerI + "]}}";*/
+		String json = "{\'bolus\' : " + bolus + ", \'cho\' : " + cho + ", \'ejercicio\' :" + ejer + ", \'exercise\' : ["
+				+ ejerT + "," + ejerD + "," + ejerI + "]}";
+		// String json = "{\'bolus\' : "+bolus+", \'cho\' : "+cho+", \'ejercicio\' :
+		// "+ejer+"}";
+		/*
+		 * String json = "{ \"data\": { \"bolus\" : " + bolus + ", \"cho\" : " + cho +
+		 * ", \"ejercicio\" : " + aux + ", \"exercise\" : [" + ejerT + "," + ejerD + ","
+		 * + ejerI + "]}}";
+		 */
 		try {
 			urlParameters = "data=" + URLEncoder.encode(json, "UTF-8");
 			URL url = new URL(urldats);

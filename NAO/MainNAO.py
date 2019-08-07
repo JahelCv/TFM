@@ -15,8 +15,8 @@ from AccionesNAO import AccionesNAO
 # TODO: Descomentar
 from DatosCompartidos import DatosCompartidos
 from SimuladorRemoto import SimuladorRemoto
-from DispatchGCloud import DispatchGCloud
-from Escenario import Escenario
+from DispatchMQTT import DispatchMQTT
+#from Escenario import Escenario
 #from Interaccion import Interaccion
 #from ThreadManager import ThreadManager
 
@@ -65,10 +65,10 @@ class ServerModule(ALModule):
         self.dc.setData("EXACPALABRA",0.4,False)
         
         # El que interactua de verdad con el usuario
-        self.es = Escenario(self.dc, self.ac, self.simremoto)
+#        self.es = Escenario(self.dc, self.ac, self.simremoto)
         
         # Crea el que atiende a los subscriptores
-        self.dgc = DispatchGCloud(self.ac)
+        self.dmqtt = DispatchMQTT(self.ac)
     
     def onWordRecognized(self, key, value, message):
         self.ac.palabraReconocida(value[0], value[1])
@@ -90,8 +90,8 @@ def main():
     Server = ServerModule("Server")
 
     try:
-        t = Thread(target = Server.es.run)
-        t.start()
+#        t = Thread(target = Server.es.run)
+#        t.start()
         while True:
             print 'Glucosa actual: ' + str(Server.simremoto.getGlucosaRemoto())
             time.sleep(2)
@@ -101,6 +101,7 @@ def main():
         if Server.ac.isWaitingWord:
             Server.memory.unsubscribeToEvent("WordRecognized", "Server")
             Server.asr.unsubscribe("Server")
+            Server.dmqtt.pararMQTT()
         myBroker.shutdown()
         sys.exit(0)
 

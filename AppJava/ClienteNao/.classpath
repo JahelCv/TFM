@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="C:/Users/Jahel/Documents/TFM/NAOProject_Backup_C/devtools/ClienteNao/jfreechart-1.0.19-swt.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jahel/Documents/TFM/NAOProject_Backup_C/devtools/ClienteNao/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jahel/Documents/TFM/NAOProject_Backup_C/devtools/ClienteNao/java-json.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jahel/Documents/TFM/NAOProject_Backup_C/devtools/ClienteNao/org.eclipse.paho.client.mqttv3-1.2.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,4 +1,4 @@
-from multiprocessing import Lock
+from threading import Lock
 
 class DatosCompartidos():
     def __init__(self):

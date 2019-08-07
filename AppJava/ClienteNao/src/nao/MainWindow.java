@@ -70,7 +70,7 @@ public class MainWindow {
 				   }
 			}
 		});
-		textIP.setText("34.77.125.204");
+		textIP.setText("34.76.240.69");
 		textIP.setBounds(10, 36, 125, 20);
 		frmClienteNao.getContentPane().add(textIP);
 		textIP.setColumns(10);
@@ -111,6 +111,7 @@ public class MainWindow {
 			//statuslabel.setText("Verificando que Google Compute Engine está conectado...");
 			if (gcloud.verificaConexionGCE()) {
 				System.out.println("Conexion verificada");
+				//System.out.println("Resultado de testPublicador de PAHO" + gcloud.testPahoDemo());
 				
 				vv = new VentanaVisualizacion();
 				vc = new VentanaControl(gcloud,vv);

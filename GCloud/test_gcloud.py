@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import requests
 import time
-urlroot = "http://34.77.125.204:80/"
-urlmod = "http://34.77.125.204:80/ModoSimulador/"
-urlglu = "http://34.77.125.204:80/Glucosa/"
-urlpara = "http://34.77.125.204:80/ParaHilo/"
-urldats = "http://34.77.125.204:80/DatosSimulacion/"
-urlarranca = "http://34.77.125.204:80/ArrancaHilo/"
-urlpausa = "http://34.77.125.204:80/PausaHilo/"
-urldespausa = "http://34.77.125.204:80/DespausaHilo/"
+urlroot = "http://34.76.240.69:80/"
+urlmod = "http://34.76.240.69:80/ModoSimulador/"
+urlglu = "http://34.76.240.69:80/Glucosa/"
+urlpara = "http://34.76.240.69:80/ParaHilo/"
+urldats = "http://34.76.240.69:80/DatosSimulacion/"
+urlarranca = "http://34.76.240.69:80/ArrancaHilo/"
+urlpausa = "http://34.76.240.69:80/PausaHilo/"
+urldespausa = "http://34.76.240.69:80/DespausaHilo/"
 
 #urlroot = "http://localhost:80/"
 #urlmod = "http://localhost:80/ModoSimulador/"
