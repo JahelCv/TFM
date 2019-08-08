@@ -6,7 +6,7 @@ class DispatchMQTT(object):
         self.acNAO = ac
         
         broker_address="iot.eclipse.org"
-        self.mqttclient = mqtt.Client("NaoClient", clean_session=True) #create new instance
+        self.mqttclient = mqtt.Client("NaoClientSub", clean_session=True) #create new instance
         self.mqttclient.on_message=self.callbackReceived
         
         # Conecta a broker e inicia servicio
@@ -30,12 +30,17 @@ class DispatchMQTT(object):
         
         elif message.topic == "nao/exacpalabra":
             print("Recibo en nao/exacpalabra: ", str(message.payload.decode("utf-8")))
-            print(" #### TODO!! ####")
+            fmsg = float(str(message.payload.decode("utf-8")))
+            if fmsg >= 0.1 and fmsg <= 0.9:
+                self.datos.modifyData("EXACPALABRA", fmsg)
         
         elif message.topic == "nao/hilos":
             print("Recibo en nao/hilos: ", str(message.payload.decode("utf-8")))
             print(" #### TODO!! ####")
         
+        # En este topic viene en formato verde,on
+        # siendo el primer componente rojo, azul o verde
+        # siendo el segundo componente on o off
         elif message.topic == "nao/leds":
             mensaje = str(message.payload.decode("utf-8"))
             print("Recibo en nao/leds: ", str(message.payload.decode("utf-8")))
