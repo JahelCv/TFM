@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import paho.mqtt.client as mqtt
+from DatosCompartidos import DatosCompartidos
 
 class DispatchMQTT(object):
-    def __init__(self, ac):
+    def __init__(self, ac, dc):
         self.acNAO = ac
+        self.datos = dc
         
         broker_address="iot.eclipse.org"
         self.mqttclient = mqtt.Client("NaoClientSub", clean_session=True) #create new instance
@@ -19,6 +21,11 @@ class DispatchMQTT(object):
         self.mqttclient.subscribe("nao/hilos")
         self.mqttclient.subscribe("nao/leds")
         self.mqttclient.subscribe("nao/mover")
+        
+    def publicaInterfazHilosMQTT(self, msg):
+        print "Antes de hacer un publish"
+        self.mqttclient.publish("interfaz/hilos",msg)
+        print "Despues de hacer un publish"
     
     def callbackReceived(self, client, userdata, message):
         if message.topic == "nao/decir":
@@ -36,7 +43,17 @@ class DispatchMQTT(object):
         
         elif message.topic == "nao/hilos":
             print("Recibo en nao/hilos: ", str(message.payload.decode("utf-8")))
-            print(" #### TODO!! ####")
+            mensaje = str(message.payload.decode("utf-8"))
+            lmensaje = mensaje.split(',')
+            if lmensaje[1] == "PARADO":
+                print("Paro hilo id: " + lmensaje[0])
+                self.datos.pararHiloExcluyente(lmensaje[0])
+            elif lmensaje[1] == "CORRIENDO":
+                print("Arranco hilo id: " + lmensaje[0])
+                self.datos.arrancarHiloExcluyente(lmensaje[0])
+            elif lmensaje[1] == "PAUSADO":
+                print("Pauso hilo id: " + lmensaje[0])
+                self.datos.pausarHiloExcluyente(lmensaje[0])
         
         # En este topic viene en formato verde,on
         # siendo el primer componente rojo, azul o verde

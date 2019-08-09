@@ -5,15 +5,10 @@ from SimuladorRemoto import SimuladorRemoto
 from collections import deque
 from time import time
 import random
-from Runnable import Runnable
+from threading import Thread
 
-PARADO = 0
-CORRIENDO = 1
-PAUSADO = 2 
-
-class Escenario(Runnable):
-    def __init__(self, d, ac, r):
-        super().__init__()        
+class Escenario(object):
+    def __init__(self, d, ac, r): 
         self.pausa = False
         self.glucosa = deque((-1, -1, -1, -1, -1))
         self.exactitud = 0.3
@@ -32,15 +27,25 @@ class Escenario(Runnable):
     def setSimuladorRemoto(self, r):
         self.simremoto = r
         
+    def pararThread(self):
+        self.pararLoop = False
+        self.acNAO.pararEsperaPalabra()
+        
+    def startThread(self):
+        hilo = Thread(target=self.run)
+        hilo.start()
+    
+    def pausar(self):
+        print 'En ESCENARIO el metodo PAUSAR No hace nada'
+        
+    def desPausar(self):
+        print 'En ESCENARIO el metodo DESPAUSAR No hace nada'
+            
     def mirarGlucosa(self):
         glucosaAux = self.simremoto.getGlucosaRemoto()
         self.glucosa.appendleft(glucosaAux)
         self.glucosa.pop()
         return glucosaAux
-        
-    def pararThread(self):
-        self.pararLoop = False
-        self.acNAO.pararEsperaPalabra()
         
     def actualizarContador(self):
         self.contador = self.contador + 1
@@ -48,8 +53,7 @@ class Escenario(Runnable):
             self.contador = 1
     
     def getWordlistFase2(self):
-        return ['vamos a hacer deporte', 'tienes hambre', 'avanza', 
-                'dime tu glucosa', 'avanza']
+        return ['vamos a hacer deporte', 'tienes hambre', 'avanza', 'dime tu glucosa']
         
     def getWordlistFase3(self):
         if self.estado == 1:
@@ -68,7 +72,7 @@ class Escenario(Runnable):
         cho = 0
         bolus = 0
         respEspera = 1
-        self.datos.modifyData("ESCENARIO", self.fase)
+#        self.datos.modifyData("ESCENARIO", self.fase)
         
         ################################################
         #### COMPROBACION DE GLUCOSA ###################
@@ -206,7 +210,7 @@ class Escenario(Runnable):
         ################################################
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
-        (respEspera,palabraRec,exac)  = self.acNAO.esperarPalabra(self.getWordlistFase3(),15)
+        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase3(),15)
         
         # Interpretamos respuesta, que si es correcta actuamos
         if respEspera == -1 or respEspera == -2:
@@ -472,8 +476,9 @@ class Escenario(Runnable):
         cho = 0
         bolus = 0
         aux = 0
-        msg = str(self.fase) + ',' + str(self.estadotaller) + ',' + str(self.numHambre) + ',' + str(self.numEjercicio) + ',' + str(self.ultimaPalabra)
-        self.datos.modifyData("ESCENARIO",msg)
+        print('Ejecuto fase2, glucosa actual: ' + str(self.glucosa[0]) )
+#        msg = str(self.fase) + ',' + str(self.estadotaller) + ',' + str(self.numHambre) + ',' + str(self.numEjercicio) + ',' + str(self.ultimaPalabra)
+#        self.datos.modifyData("ESCENARIO",msg)
 
         ################################################
         #### SEGUN NIVEL DE GLUCOSA HACEMOS ############
@@ -481,6 +486,7 @@ class Escenario(Runnable):
 
         # Glucosa bien
         if self.glucosa[0] > 75 and self.glucosa[0] < 150:
+            print 'Glucosa correcta'
             self.acNAO.setLedsOjosBlue(False)
             self.acNAO.setLedsOjosGreen(True)
             self.acNAO.setLedsOjosRed(False)
@@ -500,6 +506,7 @@ class Escenario(Runnable):
                     
         # Glucosa baja
         elif self.glucosa[0] < 75:
+            print 'Glucosa baja'
             self.acNAO.setLedsOjosBlue(False)
             self.acNAO.setLedsOjosGreen(False)
             self.acNAO.setLedsOjosRed(True)
@@ -528,6 +535,7 @@ class Escenario(Runnable):
           
         # Glucosa alta      
         elif self.glucosa[0] >= 300:
+            print 'Glucosa muy alta'
             self.acNAO.setLedsOjosBlue(True)
             self.acNAO.setLedsOjosGreen(True)
             self.acNAO.setLedsOjosRed(False)
@@ -536,15 +544,18 @@ class Escenario(Runnable):
         ################################################
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
-        (respEspera,palabraRec,exac) = self.acNAO.esperarPalabra(self.getWordlistFase2(),10)
+        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase2(),10)
     
         # Interpretamos respuesta, que si es correcta actuamos
         if respEspera == -1 or respEspera == -2:
-            pass
+            print 'respEspera - Respuesta negativa'
         elif respEspera == 1:
+            
             if exac < self.exactitud:
+                print 'respEspera - Exactitud no suficiente'
                 self.acNAO.decirFrase('Perdona, no te he entendido, repítemelo más despacito por favor.')
             else:
+                print 'respEspera - Respuesta entendida' + palabraRec
                 if palabraRec == 'vamos a hacer deporte':
                     self.ultimaPalabra = 'vamos a hacer deporte'
                     if self.numEjercicio == 1:
@@ -582,6 +593,13 @@ class Escenario(Runnable):
                         self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte.')
                         self.numEjercicio = self.numEjercicio + 1
+                        
+                elif palabraRec == 'dime tu glucosa':
+                    print 'Escenario - Orden de decir glucosa'
+                    self.acNAO.decirFrase('Voy medir mi glucosa.')
+                    aux = self.mirarGlucosa()
+                    self.acNAO.accionMedirGlucosa()
+                    self.acNAO.decirFrase('Ahora mismo tengo ' + str(aux))
                         
                 elif palabraRec == 'tienes hambre':
                     self.ultimaPalabra = 'tienes hambre'
@@ -634,13 +652,10 @@ class Escenario(Runnable):
             
     # El "run" de c++ runnable - TODO
     def run(self):
-        if self.datos == None or self.acNAO == None:
-            # NO SE QUE ES ESTO!! TODO: setEstadoHilo(PARADO)
-            return
-    
-        self.acNAO.setThreadBock(True)
+        print('Arranca Escenario')
+        self.acNAO.setThreadBlock(True)
         self.acNAO.accionLevantarse()
-        self.datos.setData('ESCENARIO',-1,True);
+#        self.datos.setData('ESCENARIO',-1,True);
 
         self.ultimaPalabra = 'default'
         self.ultimaPostura = 'default'
@@ -650,7 +665,7 @@ class Escenario(Runnable):
         self.numEjercicio = 1
         self.estadotaller = 1
         self.estado = 1
-        self.contador=1
+        self.contador = 1
         self.iniFase3 = True
         
         while self.pararLoop :
@@ -661,7 +676,6 @@ class Escenario(Runnable):
                 #Calcular numero aleatorio entre 1 y 2
                 #- SI numerorandom = 1: el robot dará una recomendacion correcta
                 #- SI numerorandom = 2: el robot dará una recomendacion incorrecta
-                #srand(time(0)) //genera semilla basada en el reloj del sistema
                 self.numerorandom = random.randint(1,2)
                 
             if self.fase == 2:
@@ -670,5 +684,4 @@ class Escenario(Runnable):
                 self.fase3()
         
         self.acNAO.posicionParada()
-        self.acNAO.setThreadBock(False)
-        self.datos.deleteData('ESCENARIO')
+        self.acNAO.setThreadBlock(False)

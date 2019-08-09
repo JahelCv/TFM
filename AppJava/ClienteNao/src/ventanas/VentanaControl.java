@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import nao.ConectaGCloud;
+import nao.ConectaMQTT;
 import nao.HiloServidor;
 
 import java.awt.GridBagLayout;
@@ -75,6 +76,7 @@ public class VentanaControl extends JFrame {
 	private int index;
 	
 	private ConectaGCloud gcloud;
+	private ConectaMQTT c;
 	private VentanaVisualizacion vv;
 	
 	private JList<HiloServidor> list;
@@ -229,7 +231,7 @@ public class VentanaControl extends JFrame {
 				//String aux = "NAO#EXACPALABRA:0.7;";
 				//String aux = "EXACPALABRA:0.7;";
 				//gcloud.send(aux);
-				gcloud.publishMessageNaoExacpalabra("0.7");
+				c.publishMessageNaoExacpalabra("0.7");
 				textPane.append("Enviado EXACPALABRA: 0.7\n");
 			}
 		});
@@ -241,7 +243,7 @@ public class VentanaControl extends JFrame {
 				//String aux = "NAO#EXACPALABRA:0.4;";
 				//String aux = "EXACPALABRA:0.4;";
 				//gcloud.send(aux);
-				gcloud.publishMessageNaoExacpalabra("0.4");
+				c.publishMessageNaoExacpalabra("0.4");
 				textPane.append("Enviado EXACPALABRA: 0.4\n");
 			}
 		});
@@ -253,7 +255,7 @@ public class VentanaControl extends JFrame {
 				//String aux = "NAO#EXACPALABRA:0.1;";
 				//String aux = "EXACPALABRA:0.1;";
 				//gcloud.send(aux);
-				gcloud.publishMessageNaoExacpalabra("0.1");
+				c.publishMessageNaoExacpalabra("0.1");
 				textPane.append("Enviado EXACPALABRA: 0.1\n");
 			}
 		});
@@ -309,7 +311,7 @@ public class VentanaControl extends JFrame {
 						//String aux = "NAO#MOVER:"+ac+";";
 						//String aux = "MOVER:"+ac+";";
 						//gcloud.send(aux);
-						gcloud.publishMessageNaoMover(ac);
+						c.publishMessageNaoMover(ac);
 						textPane.append("Enviado MOVER: "+ ac +"\n");
 					}
 				});
@@ -376,7 +378,7 @@ public class VentanaControl extends JFrame {
 							aux = "rojo,off";
 						}
 						//gcloud.send(aux);
-						gcloud.publishMessageNaoLeds(aux);
+						c.publishMessageNaoLeds(aux);
 						textPane.append("Enviado LED: "+ aux +"\n");
 					}
 				});
@@ -398,7 +400,7 @@ public class VentanaControl extends JFrame {
 							//aux = "NAO#LED:azul,off;";	
 							aux = "azul,off";
 						}
-						gcloud.publishMessageNaoLeds(aux);
+						c.publishMessageNaoLeds(aux);
 						//gcloud.send(aux);
 						textPane.append("Enviado LED: "+ aux +"\n");
 					}
@@ -419,7 +421,7 @@ public class VentanaControl extends JFrame {
 							aux = "verde,off";
 						}
 						//gcloud.send(aux);
-						gcloud.publishMessageNaoLeds(aux);
+						c.publishMessageNaoLeds(aux);
 						textPane.append("Enviado LED: "+ aux +"\n");
 					}
 				});
@@ -429,7 +431,7 @@ public class VentanaControl extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						//String aux = "NAO#MOVER:Parada;";
 						//gcloud.send(aux);
-						gcloud.publishMessageNaoMover("Parada");
+						c.publishMessageNaoMover("Parada");
 						textPane.append("Enviado MOVER: Parada\n");
 					}
 				});
@@ -577,7 +579,7 @@ public class VentanaControl extends JFrame {
 					//String aux = "NAO#DECIR:"+textoDecir.getText()+";";
 					//String aux = "DECIR:"+textoDecir.getText()+";";
 					//gcloud.send(aux);
-					gcloud.publishMessageNaoDecir(textoDecir.getText());
+					c.publishMessageNaoDecir(textoDecir.getText());
 					textPane.append("Enviado DECIR: "+ textoDecir.getText() +"\n");
 			   }
 			}
@@ -597,7 +599,7 @@ public class VentanaControl extends JFrame {
 				//String aux = "NAO#DECIR:"+textoDecir.getText()+";";
 				//String aux = "DECIR:"+textoDecir.getText()+";";
 				//gcloud.send(aux);
-				gcloud.publishMessageNaoDecir(textoDecir.getText());
+				c.publishMessageNaoDecir(textoDecir.getText());
 				textPane.append("Enviado DECIR: "+ textoDecir.getText() +"\n");
 			}
 		});
@@ -608,6 +610,10 @@ public class VentanaControl extends JFrame {
 		gbc_buttonDecir.gridy = 0;
 		panelInferior.add(buttonDecir, gbc_buttonDecir);
 		addPopup();
+	}
+	
+	public void setConectaMQTT(ConectaMQTT c) {
+		this.c = c;
 	}
 	
 	private void addPopup(){
@@ -622,7 +628,7 @@ public class VentanaControl extends JFrame {
 				HiloServidor hilo =list.getSelectedValue();
 				if(hilo!= null ){
 					//String aux = "NAO#THREAD:"+hilo.getNombre()+",2;";
-					if (hilo.getNombre() != "SIMULACION") gcloud.publishMessageNaoHilos(hilo.getNombre()+",pausa");
+					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",PAUSADO");
 					else gcloud.GETPausa_GCE();
 				}
 			}
@@ -634,7 +640,7 @@ public class VentanaControl extends JFrame {
 				HiloServidor hilo =list.getSelectedValue();
 				if(hilo!= null ){
 					//String aux = "NAO#THREAD:"+hilo.getNombre()+",3;";
-					if (hilo.getNombre() != "SIMULACION") gcloud.publishMessageNaoHilos(hilo.getNombre()+",despausa");
+					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
 					else gcloud.GETDespausa_GCE();
 				}
 			}
@@ -646,7 +652,7 @@ public class VentanaControl extends JFrame {
 				HiloServidor hilo =list.getSelectedValue();
 				if(hilo!= null ){
 				//String aux = "NAO#THREAD:"+hilo.getNombre()+",0;";
-					if (hilo.getNombre() != "SIMULACION") gcloud.publishMessageNaoHilos(hilo.getNombre()+",para");
+					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",PARADO");
 					else gcloud.GETPara_GCE();
 				}
 			}
@@ -655,11 +661,11 @@ public class VentanaControl extends JFrame {
 		arrancar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				HiloServidor hilo =list.getSelectedValue();
+				HiloServidor hilo = list.getSelectedValue();
 				if(hilo!= null ){
-					System.out.println("Pulsa arrancar con HiloServidor not null");
+					System.out.println("Pulsa arrancar con HiloServidor ID: " + hilo.getNombre());
 				//String aux = "NAO#THREAD:"+hilo.getNombre()+",1;";
-					if (hilo.getNombre() != "SIMULACION") gcloud.publishMessageNaoHilos(hilo.getNombre()+",arranca");
+					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
 					else gcloud.GETArranca_GCE();
 				}
 			}

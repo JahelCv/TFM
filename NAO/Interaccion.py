@@ -1,19 +1,15 @@
-﻿from Runnable import Runnable
-from collections import deque
+﻿from collections import deque
 from AccionesNAO import AccionesNAO
+from SimuladorRemoto import SimuladorRemoto
 from DatosCompartidos import DatosCompartidos
 import random
 from time import time
 
-PARADO = 0
-CORRIENDO = 1
-PAUSADO = 2 
-
-class Interaccion(Runnable):
-    def __init__(self, d, ac):
-        super().__init__()
+class Interaccion(object):
+    def __init__(self, d, ac, r):
         self.ac = ac
         self.datos = d
+        self.simremoto = r
         self.glucosa = deque((-1, -1, -1, -1, -1))
         self.contador = 1
         self.wordlist = list()
@@ -36,26 +32,25 @@ class Interaccion(Runnable):
             self.ac = ac
             return 1
         return -1
+        
+    def startThread(self):
+        hilo = Thread(target=self.run)
+        hilo.start()
     
     def pararThread(self):
         self.pararLoop = False
         self.ac.pararEsperaPalabra()
     
     def pausar(self):
-        pass
+        print 'En INTERACCION el metodo PAUSAR No hace nada'
     
     def desPausar(self):
-        pass
-    
-    def guardarGlucosa(self, glu):
-        # insertamos nuevo
-        self.glucosa.appendleft(glu)
-        # quitamos antiguo
-        self.glucosa.pop()    
+        print 'En INTERACCION el metodo DESPAUSAR No hace nada'
     
     def mirarGlucosa(self):
-        glucosaAux = self.datos.getData("GLUCOSA")
-        self.guardarGlucosa(glucosaAux)
+        glucosaAux = self.simremoto.getGlucosaRemoto()
+        self.glucosa.appendleft(glu)
+        self.glucosa.pop()
         return glucosaAux
         
     def populateWordList(self):
@@ -71,17 +66,13 @@ class Interaccion(Runnable):
         self.wordlist.append('dime tu glucosa')
     
     def run(self):
-        if self.datos == None or self.ac == None:
-            self.setEstadoHilo(PARADO)
-            return
-    
         self.pararLoop = True
         exac = 0
     
         populateWordList()
-        self.datos.setData("INTERACCION","-",True)
+#        self.datos.setData("INTERACCION","-",True)
     
-        self.ac.setThreadBock(True)
+        self.ac.setThreadBlock(True)
         self.ac.accionLevantarse()
         
         # Hilo
@@ -89,7 +80,7 @@ class Interaccion(Runnable):
             self.exact = self.datos.getData("EXACPALABRA")
             probability = random.randint(0,10)
             msg = "exac:" + str(self.exact) + "prob:" + str(probability)
-            self.datos.modifyData("INTERACCION","exac:" + str(self.exact) + "prob:" + str(probability))
+#            self.datos.modifyData("INTERACCION","exac:" + str(self.exact) + "prob:" + str(probability))
             self.mirarGlucosa()
     
             if self.glucosa[0] > 75 and self.glucosa[0] < 150:            
@@ -113,7 +104,7 @@ class Interaccion(Runnable):
     
             # Esperamos palabra
             if self.ac != None:
-                (respEspera,palabraRec,exac) = self.ac.esperarPalabra(wordlist,10)
+                (respEspera,exac,palabraRec) = self.ac.esperarPalabra(wordlist,10)
                 
             # Switch de la respuesta (escuchada)
             if respEspera == -1 or respEspera == -2:
@@ -211,9 +202,7 @@ class Interaccion(Runnable):
     
         # Cuando se sale del bucle...
         self.ac.posicionParada()
-        self.ac.setThreadBock(False)
-        if self.datos != None:
-            self.datos.deleteData("INTERACCION")
+        self.ac.setThreadBlock(False)
     
     def populateWordList(self):
         self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",

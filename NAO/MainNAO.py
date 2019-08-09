@@ -16,9 +16,8 @@ from AccionesNAO import AccionesNAO
 from DatosCompartidos import DatosCompartidos
 from SimuladorRemoto import SimuladorRemoto
 from DispatchMQTT import DispatchMQTT
-#from Escenario import Escenario
-#from Interaccion import Interaccion
-#from ThreadManager import ThreadManager
+from Escenario import Escenario
+from Interaccion import Interaccion
 
 ip = "andy.local"
 
@@ -62,13 +61,26 @@ class ServerModule(ALModule):
         # DatosCompartidos tendrá un mejor uso más adelante
         # Se puede fusionar con ThreadManager
         self.dc = DatosCompartidos()
-        self.dc.setData("EXACPALABRA",0.4,False)
-        
-        # El que interactua de verdad con el usuario
-#        self.es = Escenario(self.dc, self.ac, self.simremoto)
+        self.dc.setData("EXACPALABRA",0.4)
         
         # Crea el que atiende a los subscriptores
-        self.dmqtt = DispatchMQTT(self.ac)
+        self.dmqtt = DispatchMQTT(self.ac, self.dc)
+        
+        # El que interactua de verdad con el usuario
+        self.es = Escenario(self.dc, self.ac, self.simremoto)
+        print 'Creo Escenario'
+        self.dc.addHiloExcluyente("ESCENARIO", self.es)
+        print 'Anyado ESCENARIO como hilo excluyente'
+        self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,"+self.dc.getEstadoHiloExcluyente("ESCENARIO"))
+        print 'Hago un publish al mqtt del ESCENARIO' 
+        
+        self.inte = Interaccion(self.dc, self.ac, self.simremoto)
+        print 'Creo Interaccion'
+        self.dc.addHiloExcluyente("INTERACCION", self.inte)
+        print 'Anyado INTERACCION como hilo excluyente'
+        self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,"+self.dc.getEstadoHiloExcluyente("INTERACCION"))
+        print 'Hago un publish al mqtt del INTERACCION'
+        
     
     def onWordRecognized(self, key, value, message):
         self.ac.palabraReconocida(value[0], value[1])
@@ -83,7 +95,7 @@ def main():
        ip,         # parent broker IP
        9559)       # parent broker port
 
-    # Warning: HumanGreeter must be a global variable
+    # Warning: Server must be a global variable
     # The name given to the constructor must be the name of the
     # variable
     global Server
@@ -93,7 +105,7 @@ def main():
 #        t = Thread(target = Server.es.run)
 #        t.start()
         while True:
-            print 'Glucosa actual: ' + str(Server.simremoto.getGlucosaRemoto())
+#            print 'Glucosa actual: ' + str(Server.simremoto.getGlucosaRemoto())
             time.sleep(2)
     except KeyboardInterrupt:
         print "Interrupted by user, shutting down"

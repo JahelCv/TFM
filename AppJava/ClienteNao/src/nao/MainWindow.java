@@ -29,6 +29,7 @@ public class MainWindow {
 	private VentanaVisualizacion vv;
 	private Manager manager;
 	private JLabel statuslabel;
+	private ConectaMQTT c;
 	
 	private static final String IPADDRESS_PATTERN =
 			"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
@@ -111,15 +112,13 @@ public class MainWindow {
 			//statuslabel.setText("Verificando que Google Compute Engine está conectado...");
 			if (gcloud.verificaConexionGCE()) {
 				System.out.println("Conexion verificada");
-				//System.out.println("Resultado de testPublicador de PAHO" + gcloud.testPahoDemo());
 				
 				vv = new VentanaVisualizacion();
 				vc = new VentanaControl(gcloud,vv);
 				
-				gcloud.setVentanaVisualizacion(vv);
-				gcloud.setVentanaControl(vc);
-				
-				manager = new Manager(vc, vv, gcloud);
+				manager = new Manager(vc, vv, gcloud);	
+				c = new ConectaMQTT(manager);
+				vc.setConectaMQTT(c);
 				manager.start();
 
 				vc.setVisible(true);
