@@ -40,8 +40,12 @@ class SimuladorRemoto:
     
     def enviaDatosSimulacion(self, b, c, e, e0, e1, e2):
         self.mutex.acquire()
-        r = requests.put(self.urldats, json={'bolus' : b, 'cho' : c, 
-                'ejercicio' : e, 'exercise' : [e0,e1,e2]})
+        if e:
+            aux_e = 'true'
+        else:
+            aux_e = 'false'
+        msg = "{\'bolus\' : " + str(b) + ", \'cho\' : " + str(c) + ", \'ejercicio\' :" + aux_e + ", \'exercise\' : ["+ str(e0) + "," + str(e1) + "," + str(e2) + "]}"
+        r = requests.put(self.urldats, data={'data': msg})
         self.mutex.release()
         if r.ok:
             return True

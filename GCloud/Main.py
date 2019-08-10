@@ -55,7 +55,7 @@ class DatosSimulacion(Resource):
         return s.getDatosSimulacion()
     def put(self):
         content = request.form['data']
-        #print(content, file=sys.stdout)
+        print(content, file=sys.stdout)
         jsoncont = json.loads(content.replace("'", "\""))
         return s.setDatosSimulacion(jsoncont)
         

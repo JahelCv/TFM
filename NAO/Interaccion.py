@@ -50,10 +50,10 @@ class Interaccion(object):
     
     def mirarGlucosa(self):
         glucosaAux = self.simremoto.getGlucosaRemoto()
-        glucosaAux = '%.2f'%(glucosaAux)
+        glucosastr = '%.2f'%(glucosaAux)
         self.glucosa.appendleft(glucosaAux)
         self.glucosa.pop()
-        return glucosaAux
+        return glucosastr
         
     def run(self):
         self.pararLoop = True
@@ -183,7 +183,7 @@ class Interaccion(object):
                                 self.ac.decirFrase("Solo me falta una cama.")
                             self.ac.accionTumbarse()
                             self.actualizarContador()
-                        self.ultimaPostura.assign("tumbate")
+                        self.ultimaPostura = "tumbate"
                         self.ac.decirFrase("Despiertame dentro de 5 minutitos.")
     
                     if palabraRec == "dime tu glucosa" and exac > 0.45:                    

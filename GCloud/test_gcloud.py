@@ -41,18 +41,18 @@ urldespausa = "http://34.76.240.69:80/DespausaHilo/"
 #r = requests.get(urlmod)
 #print "Modo antes de modificarlo: " + r.content
 #
-#r = requests.get(urlarranca)
-#print "Arranco hilo: " + r.content
+r = requests.get(urlarranca)
+print "Arranco hilo: " + r.content
 #
-#time.sleep(5)
+time.sleep(1)
 #
 ############ Pone datos para hacer deporte ############
-#r = requests.put(urldats, json={'bolus' : 0, 'cho' : 0, 
-#                'ejercicio' : True, 'exercise' : [0,50,60]})
-#if r.ok:
-#    print "Envio datos de simulacion: " + str(r.json())
-#else:
-#    print "No ok"
+msg = "{\'bolus\' : " + str(90.34) + ", \'cho\' : " + str(0.0) + ", \'ejercicio\' :" + 'true' + ", \'exercise\' : ["+ str(50) + "," + str(60) + "," + str(0) + "]}"
+r = requests.put(urldats, data={'data':msg})
+if r.ok:
+    print "Envio datos de simulacion: " + str(r.json())
+else:
+    print "No ok"
 #
 #time.sleep(5)
 #
