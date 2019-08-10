@@ -108,7 +108,7 @@ class Simulador(object):
                    # obtenemos marca altual del simulador
                    self.calcularMarcaActual()
                    self.glucosa = float(self.SimVolGlucosaTotal[self.marca])
-                   print('Run(): Glucosa: ' + str(self.glucosa), file=sys.stdout)
+                   # print('Run(): Glucosa: ' + str(self.glucosa), file=sys.stdout)
                    # Se ejecutara una simulacion sin entradas si pasan 5 minutos y no hay eventos.                   
                    if self.marca >= self.marcaLimite:
                        print('Run(): Bolus/Cho/Ejercicio nada nuevo y marca(' + str(self.marca)+') >= marcaLimite(' + str(self.marcaLimite) + ')' , file=sys.stdout)

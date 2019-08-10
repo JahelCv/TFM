@@ -104,11 +104,10 @@ class DatosCompartidos():
     def arrancarHiloExcluyente(self, id):
         ret = True
         self.mutexHilosExc.acquire()
-        print 'DatosCompartidos - Arranca hilo excluyente'
         if self.hiloExcluyenteCorriendo == None or self.hiloExcluyenteCorriendo == '':
             if id in self.hilosExcluyentes.keys():
                 h = self.hilosExcluyentes[id][0]
-                if self.hilosExcluyentes[id][1] != "CORRIENDO" and self.hilosExcluyentes[id][1] != "PAUSADO":
+                if self.hilosExcluyentes[id][1] == "PARADO":
                     self.hilosExcluyentes[id][1] = "CORRIENDO"
                     self.hiloExcluyenteCorriendo = id
                     h.startThread()

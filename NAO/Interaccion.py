@@ -3,7 +3,8 @@ from AccionesNAO import AccionesNAO
 from SimuladorRemoto import SimuladorRemoto
 from DatosCompartidos import DatosCompartidos
 import random
-from time import time
+import time
+from threading import Thread
 
 class Interaccion(object):
     def __init__(self, d, ac, r):
@@ -49,29 +50,17 @@ class Interaccion(object):
     
     def mirarGlucosa(self):
         glucosaAux = self.simremoto.getGlucosaRemoto()
-        self.glucosa.appendleft(glu)
+        glucosaAux = '%.2f'%(glucosaAux)
+        self.glucosa.appendleft(glucosaAux)
         self.glucosa.pop()
         return glucosaAux
         
-    def populateWordList(self):
-        self.wordlist.append('hola')
-        self.wordlist.append('adios')
-        self.wordlist.append('como te llamas')
-        self.wordlist.append('que tal estás')
-        self.wordlist.append('sientate')
-        self.wordlist.append('levantate')
-        self.wordlist.append('choca el puño')
-        self.wordlist.append('salta')
-        self.wordlist.append('tumbate')
-        self.wordlist.append('dime tu glucosa')
-    
     def run(self):
         self.pararLoop = True
         exac = 0
-    
-        populateWordList()
-#        self.datos.setData("INTERACCION","-",True)
-    
+        self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",
+                         "sientate", "levantate", "choca el puño", "salta",
+                         "tumbate", "dime tu glucosa"]
         self.ac.setThreadBlock(True)
         self.ac.accionLevantarse()
         
@@ -79,7 +68,8 @@ class Interaccion(object):
         while(self.pararLoop):
             self.exact = self.datos.getData("EXACPALABRA")
             probability = random.randint(0,10)
-            msg = "exac:" + str(self.exact) + "prob:" + str(probability)
+            print 'Interaccion # Probability: ' + str(probability)
+#            msg = "exac:" + str(self.exact) + "prob:" + str(probability)
 #            self.datos.modifyData("INTERACCION","exac:" + str(self.exact) + "prob:" + str(probability))
             self.mirarGlucosa()
     
@@ -104,7 +94,7 @@ class Interaccion(object):
     
             # Esperamos palabra
             if self.ac != None:
-                (respEspera,exac,palabraRec) = self.ac.esperarPalabra(wordlist,10)
+                (respEspera,exac,palabraRec) = self.ac.esperarPalabra(self.wordlist,10)
                 
             # Switch de la respuesta (escuchada)
             if respEspera == -1 or respEspera == -2:
@@ -128,7 +118,7 @@ class Interaccion(object):
                     if palabraRec == "como te llamas":                    
                         self.ac.decirFrase("Mi nombre es Andy, soy el robot humanoide con diabetes del instituto aídos de la Universidad Politécnica de Valencia.")
                         self.ultimaPalabra = "como te llamas"
-                        sleep(1)
+                        time.sleep(1)
                         
                     if  palabraRec == "que tal estas":                    
                         self.ac.accionQUETALESTAS(self.contador)
@@ -140,30 +130,30 @@ class Interaccion(object):
                             self.ac.decirFrase("Pero si ya estoy sentado...")
                         else:
                             if self.contador == 1:
-                                ac.decirFrase("Hora de descansar un rato. ¿Listos?")
+                                self.ac.decirFrase("Hora de descansar un rato. ¿Listos?")
                             elif self.contador == 2:
-                                ac.decirFrase("Otra vez me estás haciendo hacer deporte.")
+                                self.ac.decirFrase("Otra vez me estás haciendo hacer deporte.")
                             elif self.contador == 3:
-                                ac.decirFrase("Me dispongo a tomar asiento. Allá voy.")
+                                self.ac.decirFrase("Me dispongo a tomar asiento. Allá voy.")
                             elif self.contador == 4:
-                                ac.decirFrase("Me sentaré en el suelo porque veo que no me habéis traido una silla.")
+                                self.ac.decirFrase("Me sentaré en el suelo porque veo que no me habéis traido una silla.")
     
                         self.ac.accionSentarse()
                         self.actualizarContador()
                         self.ultimaPostura = "sientate"
-                        sleep(1)
+                        time.sleep(1)
                         
                     if palabraRec == "levantate":                    
                         if self.ultimaPostura == "sientate":                        
                             self.ac.decirFrase("Pero si me acabo de sentar...")
                             self.ac.accionLevantarse()
                             self.ultimaPostura = "levantate"
-                            sleep(1)
+                            time.sleep(1)
                         elif self.ultimaPostura == "tumbate":                        
                             self.ac.decirFrase("Con lo bien que estoy aquí tumbado...")
                             self.ac.accionLevantarse()
                             self.ultimaPostura = "levantate"
-                            sleep(1)
+                            time.sleep(1)
                         else:
                             self.ac.decirFrase("Pero si ya estoy en pie...")
                     
@@ -198,13 +188,10 @@ class Interaccion(object):
     
                     if palabraRec == "dime tu glucosa" and exac > 0.45:                    
                         self.ac.accionMedirGlucosa()
-                        self.ac.decirFrase("Ahora mismo mi glucosa es de valor " + str(self.mirarGlucosa()))
+                        glu = str(self.mirarGlucosa())
+                        self.ac.decirFrase("Ahora mismo mi glucosa es de valor " + glu)
     
         # Cuando se sale del bucle...
+        print 'Interaccion - Sale del bucle'
         self.ac.posicionParada()
         self.ac.setThreadBlock(False)
-    
-    def populateWordList(self):
-        self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",
-                         "sientate", "levantate", "choca el puño", "salta",
-                         "tumbate", "dime tu glucosa"]
