@@ -3,7 +3,7 @@ from __future__ import print_function
 import xalglib
 import time 
 import sys
-from threading import Lock, Condition
+from threading import Thread, Lock, Condition
 
 class Simulador(object):
     def __init__(self):
@@ -80,7 +80,6 @@ class Simulador(object):
         print('Run(): Arrancamos', file=sys.stdout)
         try:
             self.mutex.acquire()
-            self.estadoHilo = "CORRIENDO"
             self.ConfigurarSimulador()
             print('Run(): Antes de simular() inicial', file=sys.stdout)
             self.simular()
@@ -176,10 +175,22 @@ class Simulador(object):
         self.mutex.release()
         return ret
         
+    def arrancarSimulador(self):
+        self.mutex.acquire()
+        self.flagThread = True
+        if self.estadoHilo != "CORRIENDO":
+            self.estadoHilo = "CORRIENDO"
+            self.hilo = Thread(target=self.run)
+            self.hilo.start()
+        self.mutex.release()
+        return True
+        
     def pararSimulador(self):
         self.mutex.acquire()
         self.flagThread = False
         self.estadoHilo = "PARADO"
+        if hasattr(self, "hilo"):
+            self.hilo.join()
         self.mutex.release()
         return True
         
@@ -276,6 +287,9 @@ class Simulador(object):
         self.x[7] = self.xtbl[marca][7]
         self.x[8] = self.xtbl[marca][8]
         self.x[9] = self.xtbl[marca][9]
+        
+    def __del__(self):
+        print ("object deleted")
     
 # la funcion que necesita odesolversolve tiene que ser una funcion normal
 # (no mienbro de la clase) 

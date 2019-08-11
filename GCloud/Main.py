@@ -6,11 +6,10 @@ from flask import Flask, request, jsonify
 from gevent.pywsgi import WSGIServer
 from flask_restful import Resource, Api
 from Simulador import Simulador
-from threading import Thread
 
 app = Flask(__name__)
 api = Api(app)
-s = Simulador()    
+s = None 
 
 class HelloWorld(Resource):
     def get(self):
@@ -18,50 +17,84 @@ class HelloWorld(Resource):
         
 class ModoSimulador(Resource):
     def get(self):
+        global s
         return s.getModo()
     def put(self):
+        global s
         #print('Put sobre modosimulador: ',file=sys.stdout)
         #print(str(request.form))
         return s.setModo(request.form['data'])
         
 class Glucosa(Resource):
     def get(self):
-        return s.getGlucosa()
+        global s
+        if s != None:
+            return s.getGlucosa()
+        else:
+            return False
     def put(self):
+        global s
         print('Hace un put con dato: ', file=sys.stdout)
         print(str(request.form['data']),file=sys.stdout)
         return s.setGlucosa(request.form['data'])
         
 class ArrancaHilo(Resource):
     def get(self):
-        t = Thread(target=s.run)
-        t.start()
-        return 'Ok'
+        global s
+#        print("Tipo de S: " + str(type(s)), file=sys.stdout)
+        s = Simulador()
+        return s.arrancarSimulador()
         
 class ParaHilo(Resource):
     def get(self):
-        return s.pararSimulador()
+        global s
+        if s != None:
+#            print("Tipo de S: " + str(type(s)), file=sys.stdout)
+#            print("ParaHilo: S no es none por tanto paro y borro", file=sys.stdout)
+            return s.pararSimulador()
+            del s
+            s = None
+        else:
+            return False
         
 class PausaHilo(Resource):
     def get(self):
-        return s.pausarSimulador()
+        global s
+        if s != None:
+            return s.pausarSimulador()
+        else:
+            return False
         
 class DespausaHilo(Resource):
     def get(self):
-        return s.despausarSimulador()
+        global s
+        if s != None:
+            return s.despausarSimulador()
+        else:
+            return False
         
 class DatosSimulacion(Resource):
     def get(self):
+        global s
         return s.getDatosSimulacion()
     def put(self):
+        global s
         content = request.form['data']
         print(content, file=sys.stdout)
         jsoncont = json.loads(content.replace("'", "\""))
-        return s.setDatosSimulacion(jsoncont)
+        if s != None:
+            return s.setDatosSimulacion(jsoncont)
+        else:
+            return False
         
 class EstadoHilo(Resource):
     def get(self):
-        return s.getEstadoHilo()
+        global s
+#        print("Tipo de S: " + str(type(s)), file=sys.stdout)
+        if s == None:
+            return "PARADO"
+        else:
+            return s.getEstadoHilo()
 
 api.add_resource(HelloWorld, '/')
 api.add_resource(ArrancaHilo, '/ArrancaHilo/')

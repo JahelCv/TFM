@@ -117,7 +117,6 @@ class AccionesNAO():
             self.cond.acquire()
             self.cond.notifyAll()
             self.cond.release()
-            self.mutex.release()
         self.mutex.release()
     
     ########################################################################

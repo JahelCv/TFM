@@ -46,6 +46,7 @@ class Escenario(object):
         glucosastr = '%.2f'%(glucosaAux)
         self.glucosa.appendleft(glucosaAux)
         self.glucosa.pop()
+        print 'Escenario # Queue glucosa: ' + str(self.glucosa)
         return glucosastr
         
     def actualizarContador(self):
@@ -59,7 +60,7 @@ class Escenario(object):
     def getWordlistFase3(self):
         if self.estado == 1:
             return ['hola','adios','como te llamas','que tal estás','sientate',
-                    'levantate','choca el puño','salta','tumbate','toma un zumo',
+                    'levantate','choca el puño','salta','tumbate', 'toma un zumo',
                     'come un bocata','come una pizza','haz deporte',
                     'dime tu glucosa']
         elif self.estado == 2:
@@ -73,8 +74,8 @@ class Escenario(object):
         cho = 0
         bolus = 0
         respEspera = 1
-        # TODO: Comentar
-        self.acNAO.decirFrase('El estado de fase tres es: ' + str(self.estado))
+        print '##################################################################'
+        print 'Escenario # Inicio de run, numerorandom: ' + str(self.numerorandom)
         
         ################################################
         #### COMPROBACION DE GLUCOSA ###################
@@ -105,9 +106,11 @@ class Escenario(object):
             # En C++ esto era un switch
             # case 1:
             if self.estado == 1:
+                print 'Escenario # Primer switch, estado = 1'
                 pass
             # case 2:
             elif self.estado == 2:
+                print 'Escenario # Primer switch, estado = 2'
                 self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor')
                 self.acNAO.accionMedirGlucosa();
                 self.acNAO.decirFrase(str(self.mirarGlucosa()))
@@ -119,6 +122,7 @@ class Escenario(object):
                     self.estado = 2
             # case 3:
             elif self.estado == 3:
+                print 'Escenario # Primer switch, estado = 3'
                 self.acNAO.decirFrase('Ahora debo esperar a que lo que me he hecho haga efecto en mi.')
                 if (time.time() - self.tiempoUltimaPeticionSimu) < 60:
                     # Glucosa sube
@@ -150,7 +154,7 @@ class Escenario(object):
                 self.acNAO.decirFrase(str(self.mirarGlucosa()));
 
                 if self.numerorandom == 1:
-                    self.acNAO.decirFrase('El medico me recomienda queme pinche insulina, ¿crees que es la mejor opción?')
+                    self.acNAO.decirFrase('El medico me recomienda que me pinche insulina, ¿crees que es la mejor opción?')
                     self.estado = 2
                 elif self.numerorandom == 2:
                     self.acNAO.decirFrase('El medico me recomienda comerme un bocata, ¿crees que es la mejor opción?')
@@ -214,7 +218,9 @@ class Escenario(object):
         ################################################
         # TODO: Comentar
         self.acNAO.decirFrase('El estado de fase tres es: ' + str(self.estado))
-        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase3(),15)
+        print str(self.getWordlistFase3())
+        orden = raw_input("Enter orden fase 3: ")   # Python 2.x
+        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(orden,1)
         
         # Interpretamos respuesta, que si es correcta actuamos
         if respEspera == -1 or respEspera == -2:
@@ -552,7 +558,9 @@ class Escenario(object):
         ################################################
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
-        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase2(),10)
+        print str(self.getWordlistFase2())
+        orden = raw_input("Enter orden fase 2: ")   # Python 2.x
+        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(orden,1)
     
         # Interpretamos respuesta, que si es correcta actuamos
         if respEspera == -1 or respEspera == -2:

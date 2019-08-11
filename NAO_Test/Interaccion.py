@@ -4,7 +4,9 @@ from SimuladorRemoto import SimuladorRemoto
 from DatosCompartidos import DatosCompartidos
 import random
 import time
-from threading import Thread
+import sys
+from select import select
+from threading import Thread, Timer
 
 class Interaccion(object):
     def __init__(self, d, ac, r):
@@ -35,18 +37,18 @@ class Interaccion(object):
         return -1
         
     def startThread(self):
+        print 'En Interaccion, starts thread'
         self.hilo = Thread(target=self.run)
         self.hilo.start()
     
     def pararThread(self):
         self.pararLoop = False
-        print 'Interaccion # pararThread: Antes de self.ac.pararEsperaPalabra()'
         self.ac.pararEsperaPalabra()
-        print 'Interaccion # pararThread: hasattr(self, "hilo") = ' + str(hasattr(self, "hilo"))
+        print 'Interaccion # Deteniendo thread...'
         if hasattr(self, "hilo"):
-            print 'Interaccion # pararThread: Antes del join'
+            print 'Interaccion # Hacemos join'
             self.hilo.join()
-            print 'Interaccion # pararThread: Se hace el join'
+            print 'Interaccion # Ha terminado el join'
     
     def pausar(self):
         print 'En INTERACCION el metodo PAUSAR No hace nada'
@@ -64,8 +66,8 @@ class Interaccion(object):
     def run(self):
         self.pararLoop = True
         exac = 0
-        self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",
-                         "sientate", "levantate", "choca el puño", "salta",
+        self.wordlist = ["hola", "adios", "como te llamas", "que tal estas",
+                         "sientate", "levantate", "choca el punyo", "salta",
                          "tumbate", "dime tu glucosa"]
         self.ac.setThreadBlock(True)
         self.ac.accionLevantarse()
@@ -99,8 +101,10 @@ class Interaccion(object):
                     self.ac.decirFrase("Mi glucosa es alta")    
     
             # Esperamos palabra
-            if self.ac != None:
-                (respEspera,exac,palabraRec) = self.ac.esperarPalabra(self.wordlist,10)
+            print str(self.wordlist)            
+#            orden = self.raw_input_with_timeout("Enter orden Interaccion: ", 10)
+            orden = "hola"
+            (respEspera,exac,palabraRec) = self.ac.esperarPalabra(orden, 3)
                 
             # Switch de la respuesta (escuchada)
             if respEspera == -1 or respEspera == -2:
@@ -163,7 +167,7 @@ class Interaccion(object):
                         else:
                             self.ac.decirFrase("Pero si ya estoy en pie...")
                     
-                    if palabraRec == "choca el puño":                    
+                    if palabraRec == "choca el punyo":                    
                         self.ac.decirFrase("Choca ese puño colega.")
                         self.ac.accionChocarMano()
                         self.ultimaPalabra = "choca el puño"
@@ -198,8 +202,15 @@ class Interaccion(object):
                         self.ac.decirFrase("Ahora mismo mi glucosa es de valor " + glu)
     
         # Cuando se sale del bucle...
-        print 'Interaccion # Run: Sale del bucle'
+        print 'Interaccion - Sale del bucle'
         self.ac.posicionParada()
-        print 'Interaccion # Run: Antes de SetThreadBlock'
         self.ac.setThreadBlock(False)
-        print 'Interaccion # Run: Despues de SetThreadBlock'
+        
+    def raw_input_with_timeout(self, prompt, timeout=30.0):
+        print prompt
+        rlist, _, _ = select([sys.stdin], [], [], timeout)
+        if rlist:
+            s = sys.stdin.readline()
+            return s
+        else:
+            return ""
