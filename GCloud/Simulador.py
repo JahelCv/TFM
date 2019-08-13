@@ -1,6 +1,7 @@
 # http://www.alglib.net/translator/man/manual.cpython.html
 from __future__ import print_function
-import xalglib
+import numpy as np
+from scipy.integrate import odeint
 import time 
 import sys
 from threading import Thread, Lock, Condition
@@ -12,19 +13,19 @@ class Simulador(object):
         
         # Modo del simulador (no tiene que ver con Runnable)
         self.modo = 2  #modo por defecto (1,2,3)
-        self.bw = 70
-        self.tmaxG = 40                 # min
+        self.bw = 70.0
+        self.tmaxG = 40.0                 # min
         self.vg = 0.16 * self.bw            # L
         self.egp0 = 0.0161 * self.bw        # mmol/min
         self.f01 = 0.0097 * self.bw         # mmol/min    
-        self.fcorreccion = 0.027/6      #factor de correccion del bolus implementado
+        self.fcorreccion = 0.027/6.0      #factor de correccion del bolus implementado
     
         #condiciones normales de simulacion
-        self.bolus = 0
-        self.cho = 0
+        self.bolus = 0.0
+        self.cho = 0.0
         self.ejercicio = False
         # self.exercise = ejerciciotiempo, ejercicioIntesidad, ejercicioDuracion
-        self.exercise = list([0,0,0])
+        self.exercise = list([0.0,0.0,0.0])
         self.flagThread = True
         self.flagPausa = False
         # self.estadoHilo = "PARADO", "CORRIENDO", "PAUSADO"
@@ -65,13 +66,15 @@ class Simulador(object):
         else:
             print('%%%% ERROR en void Simular: Modo no seleccionado correctamente, de tiempos mal.')
 
-        valort = 0
-        for i in range(0,self.pasosSimulacion):
-            self.t.append(valort)
-            valort = valort + 5
+#        valort = 0
+#        for i in range(0,self.pasosSimulacion):
+#            self.t.append(valort)
+#            valort = valort + 5
+        self.t = np.arange(0, self.pasosSimulacion*5, 5)
+#        print('Simulador # ConfigurarSimulador(): ' + str(self.t), file=sys.stdout)
         
         # estadoInicial del simulador (para la primera simulacion)
-        self.x = [0,0, 366.6667,366.6667, 5.7511,0.0294,0.0047,0.2991,56.5688, 23.5554]
+        self.x = [0, 0, 366.6667, 366.6667, 5.7511, 0.0294, 0.0047, 0.2991, 56.5688, 23.5554]
         self.tiempoIniPausado = 0
         self.tiempoTotalPausado = 0
         time.sleep(0.5)
@@ -89,6 +92,8 @@ class Simulador(object):
             self.mutex.release()
     
             while (self.flagThread):
+#               if hasattr(self, "marca"):
+#                   print('self.marca: ' + str(self.marca) + ', self.marcaLimite: ' + str(self.marcaLimite), file=sys.stdout)
                # Mirar si hay pausa
                if self.flagPausa:
                    print('Run(): Entra en pausa', file=sys.stdout)
@@ -139,9 +144,11 @@ class Simulador(object):
             # Fuera del while
             self.flagThread = True
             self.glucosa = -1000
+            return
         except Exception as e:
             print('Exception en run() -> error: ' + str(e))
             return
+            
     ########################################################################    
     ###################### METODOS QUE SE UTILIZAN EN MAINAPP ##############
     ########################################################################
@@ -230,29 +237,26 @@ class Simulador(object):
     ###################### METODOS QUE SE UTILIZAN EN RUN ##################
     ########################################################################
     def simular(self):
-        eps = 0.00001
-        h = 0
+#        eps = 0.00001
+#        h = 0
         
         #actualizamos parametros que le pasamos al modelo
         self.d['bolus'] = self.bolus
         self.d['cho'] = self.cho
+        #print('Simulador # Simular(): self.cho: ' + str(self.cho) + ', tipo de cho: ' + str(type(self.cho)), file=sys.stdout)
         self.d['ejercicio']  = self.ejercicio
-        if self.ejercicio == True:        
+        if self.ejercicio:        
             self.d['exercise'][0] = self.exercise[0]
             self.d['exercise'][1] = self.exercise[1]
             self.d['exercise'][2] = self.exercise[2]
-    
-#        print('Simular(): Antes de odesolverrkck', file=sys.stdout)
-        s = xalglib.odesolverrkck(self.x, self.t, eps, h)
-#        print('Simular(): Despues de odesolverrkck' + str(self.d), file=sys.stdout)
-        xalglib.odesolversolve(s, ode_function_1_diff, self.d)
+        self.xtbl = odeint(model,self.x,self.t,args=(self.d,))
 #        print('Simular(): Despues de odesolversolve', file=sys.stdout)
 #        if hasattr(self,'xtbl'):
 #            del self.xtbl
 #        if hasattr(self,'ttbl'):
 #            del self.ttbl
-        m, self.ttbl, self.xtbl, rep = xalglib.odesolverresults(s)
-        print('Simular(): Despues de odesolverresults', file=sys.stdout)
+#        m, self.ttbl, self.xtbl, rep = xalglib.odesolverresults(s)
+#        print('Simular(): Despues de odesolverresults', file=sys.stdout)
     
         self.bolus = 0
         self.cho = 0
@@ -264,6 +268,8 @@ class Simulador(object):
     def calcularGlucosa(self):    
         for i in range(0,len(self.xtbl)):
             self.SimVolGlucosaTotal[i] = float(18 * self.xtbl[i][8] / self.vg)
+#            print('Simulador # calcularGlucosa(): self.xtbl[i][8]: ' + str(self.xtbl[i][8]) + ', i: ' + str(i), file=sys.stdout)
+#        print('Simulador # calcularGlucosa(): len(self.xtbl): ' + str(len(self.xtbl)), file=sys.stdout)
     
     def calcularMarcaActual(self):
         # tiempo = (time() - self.tiempoUltimaSimu) - self.tiempoTotalPausado
@@ -290,15 +296,8 @@ class Simulador(object):
         
     def __del__(self):
         print ("object deleted")
-    
-# la funcion que necesita odesolversolve tiene que ser una funcion normal
-# (no mienbro de la clase) 
-def ode_function_1_diff(x, t, dx, ptr):
-#    data_struct *datos
-#    datos = (data_struct*) ptr
-    datos = ptr
 
-    #***** PARAMETROS SIMULADOR ------------------
+def model(x,t,datos):
     gamma2 = 1                 # factor to change patient's insulin sensitivity (to make the patient more insulin sensitive or insulin resistant)
     #  Model parameters (Hovorka)
     ag = 0.8                  # unitless
@@ -308,12 +307,12 @@ def ode_function_1_diff(x, t, dx, ptr):
     sit = gamma2 * 0.00512    # min^(-1) per mU/L
     sid = gamma2 * 0.00082    # min^(-1) per mU/L
     sie = gamma2 * 0.052      # per mU/L
-    k12 = 0.066               # 1/min
+    k12 = 0.066             # 1/min
     ke = 0.138                # 1/min
-    vi = 0.12 * datos['bw']   # L
-    tmaxI = 55                # min
+    vi = 0.12 * datos['bw']            # L
+    tmaxI = 55.0                 # min
     #  BASAL
-    basal = 0.4/60
+    basal = 0.4/60.0
     #----------------------------------------------
 
     g1 = x[0]
@@ -327,51 +326,54 @@ def ode_function_1_diff(x, t, dx, ptr):
     Q1 = x[8]
     Q2 = x[9]
 
-    meal_duration = 1
-    u_cho = (datos['cho'] / meal_duration) * 1000 / 180
-    if (t > meal_duration):
-        u_cho = 0
-
+    meal_duration = 1.0
+    u_cho = float((datos['cho'] / meal_duration) * 1000.0 / 180.0)
+    if t > meal_duration:
+        u_cho = 0.0
+    
     u_ins_basal = basal
     u_ins_bolus = datos['bolus']
-    if (t > 1):
+    if t > 1:
         u_ins_bolus = 0
-    u_ins = 1000 * (u_ins_basal + u_ins_bolus)   # mIU / min
+    u_ins = 1000.0 * (u_ins_basal + u_ins_bolus)   # mIU / min
 
-    #/ ACTIVIDAD FISICA #############/
+    #/// ACTIVIDAD FISICA ///////////////////////////
     # change of insulin sensitiviy due to exercise
-    if datos['ejercicio'] ==True:        
-        exercise_factor=1      # standard sensitivity
-        alpha = 1.25*3.29   # according to Schiavon paper; it may require tuning for Hovorka model
-        #filasejercicio = 1; #por ahora solo metemos 1 actividad fisica cada simulacion
-        texercise=datos['exercise'][0]
-        dexercise=datos['exercise'][2]
+    if datos['ejercicio']:
+        exercise_factor = 1.0      # standard sensitivity
+        alpha = 1.25 * 3.29   # according to Schiavon paper; it may require tuning for Hovorka model
+        texercise = datos['exercise'][0]
+        dexercise = datos['exercise'][2]
 
-        if (t >= texercise) and (t < (texercise+dexercise)):            
-            exercise_factor = alpha    # factor for a 50% VO2max.... for different intensity we could change proportionally, not validated
-        elif (t >= (texercise+dexercise)) and (t < (texercise+dexercise+180)):            # generate slope: line equation (y-y0)=m*(x-x0);  y=y0+m*(x-x0)
-            exercise_factor = alpha+((1-alpha)/180)*(t-(texercise+dexercise));   # factor will return to 1 after 180 minutes
+        if t >= texercise and t < (texercise + dexercise):
+            exercise_factor = alpha;    # factor for a 50% VO2max.... for different intensity we could change proportionally, but not validated
+        elif t >= (texercise + dexercise) and t < (texercise + dexercise + 180.0):
+            # generate slope: line equation (y-y0)=m*(x-x0);  y=y0+m*(x-x0)
+            # factor will return to 1 after 180 minutes
+            exercise_factor = alpha + ((1.0 - alpha) / 180.0)*(t - (texercise + dexercise))
 
-        sid = sid*exercise_factor
-
-    #########################/
+        sid = sid * exercise_factor
+    
+    #///////////////////////////////////////////////////
 
     # glucose rate of appearance
     Ug = g2 / datos['tmaxG']
     # insulin rate of appearance
     Ui = s2 / tmaxI
     # non - insulin - dependent consumption
-    if Q1 / datos['vg'] >= 4.5:
+    F01c = 0.0
+    if (Q1 / datos['vg']) >= 4.5:
         F01c = datos['f01']
     else:
         F01c = datos['f01'] * Q1 / (datos['vg'] * 4.5)
     # renal execretion
-    if Q1 / datos['vg'] >= 9:        
+    Fr = 0.0
+    if (Q1 / datos['vg']) >= 9:
         Fr = 0.003 * (Q1 - 9 * datos['vg'])
     else:
-        Fr = 0
-
-
+        Fr = 0.0
+        
+    dx = [0,0,0,0,0,0,0,0,0,0]
     dx[0] = ag * u_cho - (1 / datos['tmaxG']) * g1
     dx[1] = (1 / datos['tmaxG']) * g1 - (1 / datos['tmaxG']) * g2
     dx[2] = u_ins - s1 / tmaxI
@@ -380,6 +382,6 @@ def ode_function_1_diff(x, t, dx, ptr):
     dx[5] = -ka1 * X1 + ka1 * sit * I
     dx[6] = -ka2 * X2 + ka2 * sid * I
     dx[7] = -ka3 * X3 + ka3 * sie * I
-    dx[8] = -F01c - X1 * Q1 + k12 * Q2 - Fr + Ug + max((float(datos['egp0'] * (1 - X3)), float(0)))
+    dx[8] = -F01c - X1 * Q1 + k12 * Q2 - Fr + Ug + max(float(datos['egp0'] * (1 - X3)), 0.0)
     dx[9] = X1 * Q1-(k12 + X2) * Q2
-    return
+    return dx
