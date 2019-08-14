@@ -7,11 +7,12 @@ class DispatchMQTT(object):
         self.acNAO = ac
         self.datos = dc
         
-        broker_address="iot.eclipse.org"
-        self.mqttclient = mqtt.Client("NaoClientSub", clean_session=True) #create new instance
-        self.mqttclient.on_message=self.callbackReceived
+        broker_address="34.76.240.69"
+        self.mqttclient = mqtt.Client() #create new instance
         
         # Conecta a broker e inicia servicio
+        self.mqttclient.username_pw_set("nao","nao")
+        self.mqttclient.on_message = self.callbackReceived
         self.mqttclient.connect(broker_address) #connect to broker
         self.mqttclient.loop_start() #start the loop
         
@@ -23,11 +24,15 @@ class DispatchMQTT(object):
         self.mqttclient.subscribe("nao/mover")
         
     def publicaInterfazHilosMQTT(self, msg):
-        print "Antes de hacer un publish"
+#        print "Antes de hacer un publish"
         self.mqttclient.publish("interfaz/hilos",msg)
-        print "Despues de hacer un publish"
+#        print "Despues de hacer un publish"
+        
+    def publicaVentanaEscenarioMQTT(self, msg):
+        self.mqttclient.publish("interfaz/ventanaescenario",msg)
     
     def callbackReceived(self, client, userdata, message):
+        print 'DispatchMQTT # callbackReceived(): '
         if message.topic == "nao/decir":
             print("Recibo en nao/decir: ", str(message.payload.decode("utf-8")))
             if self.acNAO.getThreadBlock():

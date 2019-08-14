@@ -7,11 +7,12 @@ class DispatchMQTT(object):
         self.acNAO = ac
         self.datos = dc
         
-        broker_address="iot.eclipse.org"
+        broker_address="34.76.240.69"
         self.mqttclient = mqtt.Client("NaoClientSub", clean_session=True) #create new instance
         self.mqttclient.on_message=self.callbackReceived
         
         # Conecta a broker e inicia servicio
+        self.mqttclient.username_pw_set("nao","nao")
         self.mqttclient.connect(broker_address) #connect to broker
         self.mqttclient.loop_start() #start the loop
         

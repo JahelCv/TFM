@@ -67,14 +67,14 @@ class ServerModule(ALModule):
         self.dmqtt = DispatchMQTT(self.ac, self.dc)
         
         # El que interactua de verdad con el usuario
-        self.es = Escenario(self.dc, self.ac, self.simremoto)
+        self.es = Escenario(self.dc, self.ac, self.simremoto, self.dmqtt)
         print 'Creo Escenario'
         self.dc.addHiloExcluyente("ESCENARIO", self.es)
         print 'Anyado ESCENARIO como hilo excluyente'
         self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,"+self.dc.getEstadoHiloExcluyente("ESCENARIO"))
         print 'Hago un publish al mqtt del ESCENARIO' 
         
-        self.inte = Interaccion(self.dc, self.ac, self.simremoto)
+        self.inte = Interaccion(self.dc, self.ac, self.simremoto, self.dmqtt)
         print 'Creo Interaccion'
         self.dc.addHiloExcluyente("INTERACCION", self.inte)
         print 'Anyado INTERACCION como hilo excluyente'
@@ -111,6 +111,8 @@ def main():
         print "Interrupted by user, shutting down"
         Server.asr.pause(True)
         if Server.ac.isWaitingWord:
+            Server.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
+            Server.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
             Server.memory.unsubscribeToEvent("WordRecognized", "Server")
             Server.asr.unsubscribe("Server")
             Server.dmqtt.pararMQTT()
