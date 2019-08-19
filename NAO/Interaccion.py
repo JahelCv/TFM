@@ -38,6 +38,7 @@ class Interaccion(object):
     def startThread(self):
         self.hilo = Thread(target=self.run)
         self.hilo.start()
+        self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,CORRIENDO")
     
     def pararThread(self):
         self.pararLoop = False
@@ -47,6 +48,7 @@ class Interaccion(object):
         if hasattr(self, "hilo"):
             print 'Interaccion # pararThread: Antes del join'
             self.hilo.join()
+            self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
             print 'Interaccion # pararThread: Se hace el join'
     
     def pausar(self):

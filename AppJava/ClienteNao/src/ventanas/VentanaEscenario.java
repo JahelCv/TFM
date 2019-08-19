@@ -72,30 +72,16 @@ public class VentanaEscenario extends JFrame {
 	}
 	
 	public void addDatos(String datos){
-		String[] parts = datos.split(",");
-		textArea.setText("");
-		if(Integer.parseInt(parts[0]) == 2 && parts.length == 5){
-			if(getEscenarioFlag() == false){
-				setVisible(true);
-				setEscenarioFLag(true);
-			}
-			lblFase.setText("Fase 2");
-			textArea.append("EstadoTaller: "+parts[1]+"\n");
-			textArea.append("NumHambre: "+parts[2]+"\n");
-			textArea.append("NumEjer: "+parts[3]+"\n");
-			textArea.append("Ultima palabra: "+parts[4]+"\n");
-		} else {
-			auxEscenario = false;
-			setVisible(false);
-			dispose();
-		}
+		setVisible(true);
+		setEscenarioFlag(true);
+		textArea.setText(datos);
 	}
 	
 	public boolean getEscenarioFlag(){
 		return this.auxEscenario;
 	}
 	
-	public void setEscenarioFLag(boolean aux){
+	public void setEscenarioFlag(boolean aux){
 		this.auxEscenario = aux;
 	}
 

@@ -60,8 +60,8 @@ import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.JSeparator;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+//import javax.swing.JSpinner;
+//import javax.swing.SpinnerNumberModel;
 import javax.swing.Box;
 
 public class VentanaControl extends JFrame {
@@ -77,7 +77,7 @@ public class VentanaControl extends JFrame {
 	
 	private ConectaGCloud gcloud;
 	private ConectaMQTT c;
-	private VentanaVisualizacion vv;
+	//private VentanaVisualizacion vv;
 	
 	private JList<HiloServidor> list;
 	private DefaultListModel<HiloServidor> modeloHilosNao;
@@ -123,10 +123,10 @@ public class VentanaControl extends JFrame {
 	private JMenuItem mntmMedia;
 	private JMenuItem mntmBaja;
 	
-	public VentanaControl(ConectaGCloud gcloud,VentanaVisualizacion _vv) {
+	public VentanaControl(ConectaGCloud gcloud) {
 		
 		this.gcloud = gcloud;
-		this.vv = _vv;
+		//this.vv = _vv;
 		
 		textPane = new JTextArea();
 		vSimulacion = new VentanaSimulacion(gcloud,textPane);
@@ -153,7 +153,7 @@ public class VentanaControl extends JFrame {
 		mntmSimulacion_1 = new JMenuItem("Simulacion 1");
 		mntmSimulacion_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String aux = "NAO#SIMULAR:0,0,true,0,50,60;";
+				//String aux = "NAO#SIMULAR:0,0,true,0,50,60;";
 				// cambiar por llamada http -> gcloud.send(aux);
 				gcloud.PUTSimulationParams_GCE(0, 0, true, 0.0, 50.0, 60.0);
 				textPane.append("Enviado SIMULAR: 0,0,true,0,50,60\n");
@@ -164,8 +164,6 @@ public class VentanaControl extends JFrame {
 		mntmNewMenuItem = new JMenuItem("Simulacion 2");
 		mntmNewMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//String aux = "NAO#SIMULAR:0,60,false,0,0,0;";
-				// cambiar por llamada http -> gcloud.send(aux);
 				gcloud.PUTSimulationParams_GCE(0, 60, false, 0.0, 0.0, 0.0);
 				textPane.append("Enviado SIMULAR: 0,60,false,0,0,0\n");
 			}
@@ -180,7 +178,6 @@ public class VentanaControl extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				String aux = "NAO#MODOSIMU:1;";
 				gcloud.PUTSimulationMode_GCE("1");
-				// TODO cambiar por llamada http -> gcloud.send("NAO#THREAD:SIMULACION,4;");
 				textPane.append("Enviado: "+ aux +"\n");
 			}
 		});
@@ -191,7 +188,6 @@ public class VentanaControl extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				String aux = "NAO#MODOSIMU:2;";
 				gcloud.PUTSimulationMode_GCE("2");
-				// TODO cambiar por llamada http -> gcloud.send("NAO#THREAD:SIMULACION,4;");
 				textPane.append("Enviado: "+ aux +"\n");
 			}
 		});
@@ -201,9 +197,7 @@ public class VentanaControl extends JFrame {
 		menuItemModo3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				String aux = "NAO#MODOSIMU:3;";
-				//String aux = "MODOSIMU:3;";
 				gcloud.PUTSimulationMode_GCE("3");
-				// TODO cambiar por llamada http -> gcloud.send("NAO#THREAD:SIMULACION,4;");
 				textPane.append("Enviado: "+ aux +"\n");
 			}
 		});
@@ -528,19 +522,19 @@ public class VentanaControl extends JFrame {
 				list.setSelectedIndex(aux);
 				index = list.getSelectedIndex();
 				HiloServidor hilo = list.getSelectedValue();
-				if(hilo.getEstado() == "CORRIENDO"){ //corriendo
+				if(hilo.getEstado().equals("CORRIENDO")){ //corriendo
 					pausar.setEnabled(true);
 					despausar.setEnabled(false);
 					parar.setEnabled(true);
 					arrancar.setEnabled(false);
 				}
-				if(hilo.getEstado() == "PARADO"){ //parado
+				if(hilo.getEstado().equals("PARADO")){
 					pausar.setEnabled(false);
 					despausar.setEnabled(false);
 					parar.setEnabled(false);
 					arrancar.setEnabled(true);
 				}
-				if(hilo.getEstado() == "PAUSADO"){ //pausado
+				if(hilo.getEstado().equals("PAUSADO")){ //pausado
 					pausar.setEnabled(false);
 					despausar.setEnabled(true);
 					parar.setEnabled(true);
@@ -628,7 +622,9 @@ public class VentanaControl extends JFrame {
 				HiloServidor hilo =list.getSelectedValue();
 				if(hilo!= null ){
 					//String aux = "NAO#THREAD:"+hilo.getNombre()+",2;";
-					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",PAUSADO");
+					if (hilo.getNombre() != "SIMULACION") {
+						c.publishMessageNaoHilos(hilo.getNombre()+",PAUSADO");
+					}
 					else gcloud.GETPausa_GCE();
 				}
 			}
@@ -640,7 +636,9 @@ public class VentanaControl extends JFrame {
 				HiloServidor hilo =list.getSelectedValue();
 				if(hilo!= null ){
 					//String aux = "NAO#THREAD:"+hilo.getNombre()+",3;";
-					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
+					if (hilo.getNombre() != "SIMULACION") {
+						c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
+					}
 					else gcloud.GETDespausa_GCE();
 				}
 			}
@@ -652,7 +650,9 @@ public class VentanaControl extends JFrame {
 				HiloServidor hilo =list.getSelectedValue();
 				if(hilo!= null ){
 				//String aux = "NAO#THREAD:"+hilo.getNombre()+",0;";
-					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",PARADO");
+					if (hilo.getNombre() != "SIMULACION") {
+						c.publishMessageNaoHilos(hilo.getNombre()+",PARADO");
+					}
 					else gcloud.GETPara_GCE();
 				}
 			}
@@ -665,7 +665,9 @@ public class VentanaControl extends JFrame {
 				if(hilo!= null ){
 					System.out.println("Pulsa arrancar con HiloServidor ID: " + hilo.getNombre());
 				//String aux = "NAO#THREAD:"+hilo.getNombre()+",1;";
-					if (hilo.getNombre() != "SIMULACION") c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
+					if (hilo.getNombre() != "SIMULACION") {
+						c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
+					}
 					else gcloud.GETArranca_GCE();
 				}
 			}
@@ -694,15 +696,16 @@ public class VentanaControl extends JFrame {
 		public Component getListCellRendererComponent( JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus ) {
 			HiloServidor aux = (HiloServidor) value;
             Component c = super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-   
-            if ( aux.getEstado() == "CORRIENDO" ) {
-                c.setBackground( new Color(0, 255, 0, 180) );
+            String e = aux.getEstado();
+            
+            if ( e.equals("CORRIENDO")) {
+            	c.setBackground( new Color(0, 255, 0, 180) );
             }
-            if ( aux.getEstado() == "PARADO" ) {
-                c.setBackground( new Color(255, 0, 0, 180) );
+            if ( e.equals("PARADO")) {
+            	c.setBackground( new Color(255, 0, 0, 180) );
             }
-            if ( aux.getEstado() == "PAUSADO" ) {
-                c.setBackground( new Color(255, 255, 0, 180) );
+            if ( e.equals("PAUSADO")) {
+            	c.setBackground( new Color(255, 255, 0, 180) );
             }
             return c;
         }

@@ -21,10 +21,9 @@ public class MainWindow {
 
 	private JFrame frmClienteNao;
 	private JTextField textIP;
-	private JTextField textPuerto;
+	//private JTextField textPuerto;
 	
 	private ConectaGCloud gcloud;
-	private ClienteTCP cliente;
 	private VentanaControl vc;
 	private VentanaVisualizacion vv;
 	private Manager manager;
@@ -114,7 +113,7 @@ public class MainWindow {
 				System.out.println("Conexion verificada");
 				
 				vv = new VentanaVisualizacion();
-				vc = new VentanaControl(gcloud,vv);
+				vc = new VentanaControl(gcloud);
 				
 				manager = new Manager(vc, vv, gcloud);	
 				c = new ConectaMQTT(manager);

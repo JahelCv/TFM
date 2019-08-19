@@ -29,6 +29,7 @@ public class Manager extends Thread{
 		this.vVisualizacion = vVisualizacion;
 		this.gcloud = gcloud;
 		this.parar = true; 
+		this.vEscenario = new VentanaEscenario();
 		
 		// Damos de alta el hilo del simulador porque si ha respondido a la
 		// primera llamada es que está en activo. Consultamos cómo está.
@@ -39,6 +40,11 @@ public class Manager extends Thread{
 		vControl.addEstadoHilos(hilosNao);
 		
 		vEscenario = new VentanaEscenario();
+	}
+	
+	public void setDatosVentanaEscenario(String msg) {
+		System.out.println("Manager # DE CALLBACK MQTT interfaz/ventanaescenario (setDatosVentanaEscenario): " + msg);
+		vEscenario.addDatos(msg);
 	}
 	
 	public synchronized void setHiloNAO(String id, String estado) {
@@ -56,13 +62,19 @@ public class Manager extends Thread{
 			}
 		}
 		
+		// Si es un hilo nuevo (no se ha encontrado)
 		if (!encontrado) {
 			HiloServidor aux = new HiloServidor(id);
-			aux.setEstado(gcloud.GETEstadoHiloSimulador_GCE());
+			if (aux.getNombre().equals("SIMULACION")) {
+				aux.setEstado(gcloud.GETEstadoHiloSimulador_GCE());
+			} else {
+				aux.setEstado(estado);
+			}
 			hilosNao.add(aux);
 			actualizar = true;
 		}
 		
+		// Si hay que actualizar la lista
 		if (actualizar) vControl.addEstadoHilos(hilosNao);
 		System.out.println("DE CALLBACK (setHiloNAO) # ID Hilo: "+ id + " # Estado: " + estado
 				+ " # Flag encontrado:" + encontrado + " Flag actualizar: " + actualizar);
@@ -73,8 +85,10 @@ public class Manager extends Thread{
 		
 		for(int i = 0; i < hilosNao.size(); i++) {
 			HiloServidor aux = hilosNao.get(i);
-			if (aux.getNombre().equals("SIMULADOR")) {
+			if (aux.getNombre().equals("SIMULACION")) {
+				//System.out.println("Manager # checkHiloSimulador: Encuentra en lista al simulador con param estado: " + estado);
 				if (!aux.getEstado().equals(estado)) {
+					//System.out.println("Manager # checkHiloSimulador: Actualiza su estado en lista");
 					hilosNao.get(i).setEstado(estado);
 					actualizar = true;
 				}

@@ -3,6 +3,7 @@ package nao;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
@@ -17,11 +18,15 @@ public class ConectaMQTT implements MqttCallback{
 	public ConectaMQTT(Manager m) {
 		this.m = m;
 		try {
-			mqttc = new MqttClient("tcp://iot.eclipse.org:1883", "PublicadorJava");
-			System.out.println("Crea mqtt object");
+			mqttc = new MqttClient("tcp://34.76.240.69:1883", MqttClient.generateClientId());
 			mqttc.setCallback(this);
-			mqttc.connect();
-			mqttc.subscribe("interfaz/hilos");
+			MqttConnectOptions connOpts = new MqttConnectOptions();
+		    connOpts.setCleanSession(true);
+		    connOpts.setUserName("nao");
+		    connOpts.setPassword("nao".toCharArray());
+			mqttc.connect(connOpts);
+			String[] topicsubs = {"interfaz/hilos","interfaz/ventanaescenario"};
+			mqttc.subscribe(topicsubs);
 			System.out.println("MQTT Conectado exitosamente");
 		} catch (MqttException e) {
 			e.printStackTrace();
@@ -41,10 +46,15 @@ public class ConectaMQTT implements MqttCallback{
 	}
 
 	@Override
-	public void messageArrived(String arg0, MqttMessage msg) throws Exception {
-		//System.out.println("Topic: "+ arg0 + " # Message: " + arg1);
-		String[] msgsplitted = new String(msg.getPayload()).split(",");
-		m.setHiloNAO(msgsplitted[0], msgsplitted[1]);
+	public void messageArrived(String topic, MqttMessage msg) throws Exception {
+		System.out.println("Topic: "+ topic + " # Message: " + new String(msg.getPayload()));
+		if (topic.equals("interfaz/hilos")) {
+			String[] msgsplitted = new String(msg.getPayload()).split(",");
+			m.setHiloNAO(msgsplitted[0], msgsplitted[1]);
+		} else if (topic.equals("interfaz/ventanaescenario")) {
+			m.setDatosVentanaEscenario(new String(msg.getPayload()));
+		}
+		
 	}
 	
 	/**
@@ -77,6 +87,7 @@ public class ConectaMQTT implements MqttCallback{
 	}
 
 	public void publishMessageNaoHilos(String message) {
+		System.out.println("ConectaMQTT # publishMessageNaoHilos(): " + message);
 		MqttMessage mq = new MqttMessage();
 		mq.setPayload(message.getBytes());
 		try {

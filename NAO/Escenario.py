@@ -31,10 +31,12 @@ class Escenario(object):
     def pararThread(self):
         self.pararLoop = False
         self.acNAO.pararEsperaPalabra()
+        self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
         
     def startThread(self):
         hilo = Thread(target=self.run)
         hilo.start()
+        self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,CORRIENDO")
     
     def pausar(self):
         print 'En ESCENARIO el metodo PAUSAR No hace nada'
@@ -145,34 +147,30 @@ class Escenario(object):
             self.acNAO.setLedsOjosRed(True);
             self.acNAO.decirFrase('Mi glucosa es alta.')
             
-            # Variable local, comento porque al principio siempre es 1!!
-            if respEspera == 1:
-                pass
-            elif respEspera == 2:
+            if self.estado == 1:
                 self.acNAO.accionMedirGlucosa();
-                self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor ' + str(self.mirarGlucosa()));
-
+                self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor ' + str(self.mirarGlucosa()))
                 if self.numerorandom == 1:
-                    self.acNAO.decirFrase('El medico me recomienda queme pinche insulina, ¿crees que es la mejor opción?')
+                    self.acNAO.decirFrase('El medico me recomienda que me pinche insulina, ¿crees que es la mejor opción?')
                     self.estado = 2
-                elif self.numerorandom == 2:
+                elif self.numerorandom == 2: 
                     self.acNAO.decirFrase('El medico me recomienda comerme un bocata, ¿crees que es la mejor opción?')
                     self.estado = 2
-            elif respEspera == 3:
-                self.acNAO.decirFrase('Ahora debo esperar a que la inyeccion de insulina haga efecto en mi y mi glucosa sea normal.')
-
-                if (time.time(), self.tiempoUltimaPeticionSimu) < 60:
-                    # Comprobacion de si la glucosa sube o baja
-                    if self.glucosa[0] > self.glucosa[2]:
-                        self.acNAO.decirFrase('Algo va mal. Mi glucosa debería estar bajando porque me he inyectado insulina, pero está subiendo. Debo tomar medidas')
-                        self.estado = 1
-                    elif self.glucosa[0] < self.glucosa[2]:
-                        self.acNAO.decirFrase('Mi glucosa está bajando debido a la inyección de insulina pero continua siendo alta. Debo esperar un poco más.')
-
-                    # Comprobacion de que estamos ya OK
+            elif self.estado == 3:
+                self.acNAO.decirFrase('Ahora debo esperar a que lo que me he hecho haga efecto en mi.')
+                if (time.time() - self.tiempoUltimaPeticionSimu) > 60:
+                    # Glucosa normal ya?
                     if self.glucosa[0] > 70 and self.glucosa[0] < 140:
-                        self.acNAO.decirFrase('Espera, ya me encuentro muy bien, la inyeccion de insulina me ha hecho efecto.')
+                        self.acNAO.decirFrase('Espera, ya me encuentro muy bien, me ha venido bien comer algo.')
                         self.estado = 1
+                    else:
+                        # Glucosa sube
+                        if self.glucosa[0] > self.glucosa[3]:
+                            self.acNAO.decirFrase('Algo va mal. Mi glucosa es alta y continua subiendo. Debo tomar medidas.')
+                            self.estado = 1
+                        # Glucosa baja
+                        elif self.glucosa[0] < self.glucosa[3]:
+                            self.acNAO.decirFrase('Mi glucosa está bajando, aunque sigue siendo alta. Debo esperar un ratito más.')
                         
         # Glucosa MUY alta
         elif self.glucosa[0] > 180:
@@ -488,7 +486,10 @@ class Escenario(object):
         aux = 0
         palabraRec = ""
         print('Ejecuto fase2, glucosa actual: ' + str(self.glucosa[0]) )
-        self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 2 \nEstado: " + str(self.estado) + " \nNumero random: " +str(self.numerorandom) + " \nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: " + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
+        self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 2 \nNumero random: " 
+            +str(self.numerorandom) + " \nPalabra recibida: " + str(palabraRec) 
+            + " \nPalabra anterior: " + str(self.ultimaPalabra) + " \nContador: " 
+            + str(self.contador))
 
         ################################################
         #### SEGUN NIVEL DE GLUCOSA HACEMOS ############
@@ -565,6 +566,10 @@ class Escenario(object):
                 print 'respEspera - Exactitud no suficiente'
                 self.acNAO.decirFrase('Perdona, no te he entendido, repítemelo más despacito por favor.')
             else:
+                self.dmqtt.publicaVentanaEscenarioMQTT("##### Palabra entendida ##### \nFase: 2 \nEstado: " 
+                    + str(self.estado) + " \nNumero random: " +str(self.numerorandom) 
+                    + " \nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: " 
+                    + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
                 print 'respEspera - Respuesta entendida' + palabraRec
                 if palabraRec == 'vamos a hacer deporte':
                     self.ultimaPalabra = 'vamos a hacer deporte'

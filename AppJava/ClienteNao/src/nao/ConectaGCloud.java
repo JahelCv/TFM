@@ -25,7 +25,7 @@ public class ConectaGCloud {
 	private String gce_rootip = null;
 	
 	public ConectaGCloud(String ip) {
-		gce_rootip = "http://" + ip + ":80/";
+		gce_rootip = "http://" + ip + ":5000/";
 		urlmod = gce_rootip + urlmod;
 		urlglu = gce_rootip + urlglu;
 		urlpara = gce_rootip + urlpara;
@@ -139,7 +139,11 @@ public class ConectaGCloud {
 			// System.out.println("Recibido de " + urlglu + ": " + content);
 			// Si contiene algo, que devuelva true
 			if (content.length() > 0) {
-				ret = Double.parseDouble(content.toString());
+				try {
+					ret = Double.parseDouble(content.toString());
+				} catch (NumberFormatException e) {
+					ret = -1000;
+				}
 			}
 			con.disconnect();
 		} catch (ConnectException e) {
@@ -165,6 +169,7 @@ public class ConectaGCloud {
 			String inputLine;
 			StringBuffer content = new StringBuffer();
 			while ((inputLine = in.readLine()) != null) {
+				//System.out.println("Recibido de " + urlestadohilo + ": " + inputLine);
 				content.append(inputLine);
 			}
 			in.close();
@@ -172,6 +177,8 @@ public class ConectaGCloud {
 			// Si contiene algo, que devuelva true
 			if (content.length() > 0) {
 				ret = content.toString();
+				ret = ret.replace("\"", "");
+				//System.out.println("Manager # GETEstadoHiloSimulador_GCE: Recibido de " + urlestadohilo + ": " + ret);
 			}
 			con.disconnect();
 		} catch (ConnectException e) {
