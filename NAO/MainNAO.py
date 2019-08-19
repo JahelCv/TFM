@@ -6,6 +6,7 @@
 import sys
 import time
 from threading import Thread
+from requests import exceptions
 
 from naoqi import ALProxy
 from naoqi import ALBroker
@@ -43,43 +44,62 @@ class ServerModule(ALModule):
         # Inicializo clases
         self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, 
                               self.postureProxy, self.motionProxy, self.autmov, 
-                              self.aspeech, "Server")      
-        self.ac.decirFrase("Creo proxies exitosamente")        
-        self.ac.setLedsOjosRed(False)
-        self.ac.setLedsOjosGreen(True)
-        self.ac.setLedsOjosBlue(False)
+                              self.aspeech, "Server")    
+        self.ac.setRotateEyes()
         
-        # Creo conexion con simulador 
-        self.simremoto = SimuladorRemoto()
-        
-        # Lanza hilo en remoto
-        if self.simremoto.arrancaSimuladorRemoto():
-            self.ac.decirFrase('Se ha arrancado el simulador en remoto')
-        else:
-            self.ac.decirFrase('Error arrancando el simulador en remoto')
-            
         # DatosCompartidos tendrá un mejor uso más adelante
         # Se puede fusionar con ThreadManager
         self.dc = DatosCompartidos()
         self.dc.setData("EXACPALABRA",0.4)
         
-        # Crea el que atiende a los subscriptores
-        self.dmqtt = DispatchMQTT(self.ac, self.dc)
-        
-        # El que interactua de verdad con el usuario
-        self.es = Escenario(self.dc, self.ac, self.simremoto, self.dmqtt)
-        print 'Creo Escenario'
-        self.dc.addHiloExcluyente("ESCENARIO", self.es)
-        print 'Anyado ESCENARIO como hilo excluyente'
-        self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,"+self.dc.getEstadoHiloExcluyente("ESCENARIO"))
-        print 'Hago un publish al mqtt del ESCENARIO' 
-        
-        self.inte = Interaccion(self.dc, self.ac, self.simremoto, self.dmqtt)
-        print 'Creo Interaccion'
-        self.dc.addHiloExcluyente("INTERACCION", self.inte)
-        print 'Anyado INTERACCION como hilo excluyente'
-        self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,"+self.dc.getEstadoHiloExcluyente("INTERACCION"))
-        print 'Hago un publish al mqtt del INTERACCION'
+        try:
+            # Crea el que atiende a los subscriptores
+            self.dmqtt = DispatchMQTT(self.ac, self.dc)
+            
+            # Creo conexion con simulador 
+            self.simremoto = SimuladorRemoto()
+            self.simremoto.arrancaSimuladorRemoto()
+            
+            # El que interactua de verdad con el usuario
+            self.es = Escenario(self.dc, self.ac, self.simremoto, self.dmqtt)
+            print 'Creo Escenario'
+            self.dc.addHiloExcluyente("ESCENARIO", self.es)
+            print 'Anyado ESCENARIO como hilo excluyente'
+            self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,"+self.dc.getEstadoHiloExcluyente("ESCENARIO"))
+            print 'Hago un publish al mqtt del ESCENARIO' 
+            
+            self.inte = Interaccion(self.dc, self.ac, self.simremoto, self.dmqtt)
+            print 'Creo Interaccion'
+            self.dc.addHiloExcluyente("INTERACCION", self.inte)
+            print 'Anyado INTERACCION como hilo excluyente'
+            self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,"+self.dc.getEstadoHiloExcluyente("INTERACCION"))
+            print 'Hago un publish al mqtt del INTERACCION'
+            self.ac.setLedsOjosRed(False)
+            self.ac.setLedsOjosGreen(True)
+            self.ac.setLedsOjosBlue(False)
+            self.ac.decirFrase("Módulo arrancado exitosamente.")
+        except exceptions.ConnectionError:
+            print "MainNAO # Exception!"
+            self.asr.pause(True)
+            if self.ac.isWaitingWord:
+                self.memory.unsubscribeToEvent("WordRecognized", "Server")
+                self.asr.unsubscribe("Server")
+                self.dmqtt.pararMQTT()
+            self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
+            self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
+            self.ac.decirFrase('No se ha podido conectar con el servicio en la nube, detengo el proceso.')
+            sys.exit(0)
+        except Exception:
+            print "MainNAO # Exception!"
+            self.asr.pause(True)
+            if self.ac.isWaitingWord:
+                self.memory.unsubscribeToEvent("WordRecognized", "Server")
+                self.asr.unsubscribe("Server")
+                self.dmqtt.pararMQTT()
+            self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
+            self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
+            self.ac.decirFrase('Ha ocurrido algún problema, detengo el proceso.')
+            sys.exit(0)
         
     
     def onWordRecognized(self, key, value, message):
@@ -111,11 +131,24 @@ def main():
         print "Interrupted by user, shutting down"
         Server.asr.pause(True)
         if Server.ac.isWaitingWord:
-            Server.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
-            Server.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
             Server.memory.unsubscribeToEvent("WordRecognized", "Server")
             Server.asr.unsubscribe("Server")
             Server.dmqtt.pararMQTT()
+        Server.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
+        Server.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
+        Server.ac.decirFrase('Corto el módulo manualmente.')
+        myBroker.shutdown()
+        sys.exit(0)
+    except Exception:
+        print "MainNAO # Exception!"
+        Server.asr.pause(True)
+        if Server.ac.isWaitingWord:
+            Server.memory.unsubscribeToEvent("WordRecognized", "Server")
+            Server.asr.unsubscribe("Server")
+            Server.dmqtt.pararMQTT()
+        Server.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
+        Server.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
+        Server.ac.decirFrase('Ha ocurrido algún problema, detengo el proceso.')
         myBroker.shutdown()
         sys.exit(0)
 

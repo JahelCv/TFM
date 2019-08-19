@@ -29,6 +29,7 @@ class DispatchMQTT(object):
 #        print "Despues de hacer un publish"
         
     def publicaVentanaEscenarioMQTT(self, msg):
+        print "DispatchMQTT # publicaVentanaEscenarioMQTT: Publico -> " + str(msg)
         self.mqttclient.publish("interfaz/ventanaescenario",msg)
     
     def callbackReceived(self, client, userdata, message):

@@ -4,12 +4,11 @@ from SimuladorRemoto import SimuladorRemoto
 from DatosCompartidos import DatosCompartidos
 import random
 import time
-import sys
-from select import select
-from threading import Thread, Timer
+from threading import Thread
 
 class Interaccion(object):
-    def __init__(self, d, ac, r):
+    def __init__(self, d, ac, r, mqtt):
+        self.dmqtt = mqtt
         self.ac = ac
         self.datos = d
         self.simremoto = r
@@ -37,18 +36,18 @@ class Interaccion(object):
         return -1
         
     def startThread(self):
-        print 'En Interaccion, starts thread'
         self.hilo = Thread(target=self.run)
         self.hilo.start()
     
     def pararThread(self):
         self.pararLoop = False
+        print 'Interaccion # pararThread: Antes de self.ac.pararEsperaPalabra()'
         self.ac.pararEsperaPalabra()
-        print 'Interaccion # Deteniendo thread...'
+        print 'Interaccion # pararThread: hasattr(self, "hilo") = ' + str(hasattr(self, "hilo"))
         if hasattr(self, "hilo"):
-            print 'Interaccion # Hacemos join'
+            print 'Interaccion # pararThread: Antes del join'
             self.hilo.join()
-            print 'Interaccion # Ha terminado el join'
+            print 'Interaccion # pararThread: Se hace el join'
     
     def pausar(self):
         print 'En INTERACCION el metodo PAUSAR No hace nada'
@@ -66,9 +65,9 @@ class Interaccion(object):
     def run(self):
         self.pararLoop = True
         exac = 0
-        self.wordlist = ["hola", "adios", "como te llamas", "que tal estas",
-                         "sientate", "levantate", "choca el punyo", "salta",
-                         "tumbate", "dime tu glucosa"]
+        self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",
+                         "sientate", "levantate", "choca el puño", "salta",
+                         "tumbate", "dime tu glucosa", "apágate"]
         self.ac.setThreadBlock(True)
         self.ac.accionLevantarse()
         
@@ -101,10 +100,8 @@ class Interaccion(object):
                     self.ac.decirFrase("Mi glucosa es alta")    
     
             # Esperamos palabra
-            print str(self.wordlist)            
-#            orden = self.raw_input_with_timeout("Enter orden Interaccion: ", 10)
-            orden = "hola"
-            (respEspera,exac,palabraRec) = self.ac.esperarPalabra(orden, 3)
+            if self.ac != None:
+                (respEspera,exac,palabraRec) = self.ac.esperarPalabra(self.wordlist,10)
                 
             # Switch de la respuesta (escuchada)
             if respEspera == -1 or respEspera == -2:
@@ -167,7 +164,7 @@ class Interaccion(object):
                         else:
                             self.ac.decirFrase("Pero si ya estoy en pie...")
                     
-                    if palabraRec == "choca el punyo":                    
+                    if palabraRec == "choca el puño":                    
                         self.ac.decirFrase("Choca ese puño colega.")
                         self.ac.accionChocarMano()
                         self.ultimaPalabra = "choca el puño"
@@ -200,17 +197,17 @@ class Interaccion(object):
                         self.ac.accionMedirGlucosa()
                         glu = str(self.mirarGlucosa())
                         self.ac.decirFrase("Ahora mismo mi glucosa es de valor " + glu)
+                    
+                    if palabraRec == "apágate":
+                        self.ac.decirFrase("Hasta pronto! Ha sido un placer conocerte.")
+                        self.ac.accionDespedida(self.contador)
+                        self.actualizarContador()
+                        self.ultimaPalabra = "apágate"
+                        self.pararLoop = False
     
         # Cuando se sale del bucle...
-        print 'Interaccion - Sale del bucle'
+        print 'Interaccion # Run: Sale del bucle'
         self.ac.posicionParada()
+        print 'Interaccion # Run: Antes de SetThreadBlock'
         self.ac.setThreadBlock(False)
-        
-    def raw_input_with_timeout(self, prompt, timeout=30.0):
-        print prompt
-        rlist, _, _ = select([sys.stdin], [], [], timeout)
-        if rlist:
-            s = sys.stdin.readline()
-            return s
-        else:
-            return ""
+        print 'Interaccion # Run: Despues de SetThreadBlock'

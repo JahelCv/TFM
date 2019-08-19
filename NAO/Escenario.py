@@ -56,14 +56,14 @@ class Escenario(object):
     
     def getWordlistFase2(self):
         return ['vamos a hacer deporte', 'tienes hambre', 'avanza', 
-                'dime tu glucosa', 'apágate']
+                'dime tu glucosa']
         
     def getWordlistFase3(self):
         if self.estado == 1:
             return ['hola','adios','como te llamas','que tal estás','sientate',
                     'levantate','choca el puño','salta','tumbate','toma un zumo',
                     'come un bocata','come una pizza','haz deporte',
-                    'dime tu glucosa','apágate']
+                    'dime tu glucosa']
         elif self.estado == 2:
             return ['si','no','dime tu glucosa']
         elif self.estado == 3:
@@ -76,10 +76,10 @@ class Escenario(object):
         bolus = 0
         respEspera = 1
         palabraRec = ""
-        self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 3\nEstado: " 
-            + str(self.estado) + "\nNumero random: " +str(self.numerorandom)
-            + "\nPalabra recibida: " + str(palabraRec) + "\nPalabra anterior: "
-            + str(self.ultimaPalabra) + "\n Contador: " + str(self.contador))
+        self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 3 \nEstado: " 
+            + str(self.estado) + " \nNumero random: " +str(self.numerorandom)
+            + "\nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: "
+            + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
         
         ################################################
         #### COMPROBACION DE GLUCOSA ###################
@@ -213,10 +213,10 @@ class Escenario(object):
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
         (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase3(),15)
-        self.dmqtt.publicaVentanaEscenarioMQTT("##### Despues de esperarPalabra ##### \nFase: 3\nEstado: " 
+        self.dmqtt.publicaVentanaEscenarioMQTT("##### Despues de esperarPalabra ##### \nFase: 3 \nEstado: " 
             + str(self.estado) + "\nNumero random: " +str(self.numerorandom)
-            + "\nPalabra recibida: " + str(palabraRec) + "\nPalabra anterior: "
-            + str(self.ultimaPalabra) + "\n Contador: " + str(self.contador))
+            + "\nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: "
+            + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
         
         # Interpretamos respuesta, que si es correcta actuamos
         if respEspera == -1 or respEspera == -2:
@@ -488,12 +488,7 @@ class Escenario(object):
         aux = 0
         palabraRec = ""
         print('Ejecuto fase2, glucosa actual: ' + str(self.glucosa[0]) )
-#        msg = str(self.fase) + ',' + str(self.estadotaller) + ',' + str(self.numHambre) + ',' + str(self.numEjercicio) + ',' + str(self.ultimaPalabra)
-#        self.datos.modifyData("ESCENARIO",msg)
-        self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 2\nEstado: " 
-            + str(self.estado) + "\nNumero random: " +str(self.numerorandom)
-            + "\nPalabra recibida: " + str(palabraRec) + "\nPalabra anterior: "
-            + str(self.ultimaPalabra) + "\n Contador: " + str(self.contador))
+        self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 2 \nEstado: " + str(self.estado) + " \nNumero random: " +str(self.numerorandom) + " \nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: " + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
 
         ################################################
         #### SEGUN NIVEL DE GLUCOSA HACEMOS ############
@@ -679,10 +674,6 @@ class Escenario(object):
                 elif palabraRec == 'avanza':
                     self.acNAO.decirFrase('Cambiamos a la fase 3')
                     self.fase = 3
-                    
-                elif palabraRec == 'apágate':
-                    self.pararLoop = False
-                    self.acNAO.decirFrase('Adiós, ha sido un placer conocerte.')
             
     # El "run" de c++ runnable - TODO
     def run(self):
@@ -715,6 +706,5 @@ class Escenario(object):
                 self.fase2()
             elif self.fase == 3:
                 self.fase3()
-        
         self.acNAO.posicionParada()
         self.acNAO.setThreadBlock(False)

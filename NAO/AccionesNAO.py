@@ -478,6 +478,8 @@ class AccionesNAO():
             self.leds.on("LedsOjosVerde")
         else:
             self.leds.off("LedsOjosVerde")
+    def setRotateEyes(self):
+        return self.leds.rotateEyes(0x03FCA9, 1, 3)
             
     def configurarGruposLeds(self):
         names1 = [

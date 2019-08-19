@@ -5,14 +5,14 @@ from threading import Lock
 class SimuladorRemoto:
     def __init__(self):
         self.mutex = Lock()
-        self.urlroot = "http://34.76.240.69:80/"
-        self.urlmod = "http://34.76.240.69:80/ModoSimulador/"
-        self.urlglu = "http://34.76.240.69:80/Glucosa/"
-        self.urlpara = "http://34.76.240.69:80/ParaHilo/"
-        self.urldats = "http://34.76.240.69:80/DatosSimulacion/"
-        self.urlarranca = "http://34.76.240.69:80/ArrancaHilo/"
-        self.urlpausa = "http://34.76.240.69:80/PausaHilo/"
-        self.urldespausa = "http://34.76.240.69:80/DespausaHilo/"
+        self.urlroot = "http://34.76.240.69:5000/"
+        self.urlmod = "http://34.76.240.69:5000/ModoSimulador/"
+        self.urlglu = "http://34.76.240.69:5000/Glucosa/"
+        self.urlpara = "http://34.76.240.69:5000/ParaHilo/"
+        self.urldats = "http://34.76.240.69:5000/DatosSimulacion/"
+        self.urlarranca = "http://34.76.240.69:5000/ArrancaHilo/"
+        self.urlpausa = "http://34.76.240.69:5000/PausaHilo/"
+        self.urldespausa = "http://34.76.240.69:5000/DespausaHilo/"
     
     def getGlucosaRemoto(self):
         self.mutex.acquire()

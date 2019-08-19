@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 from __future__ import print_function
 import sys
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from gevent.pywsgi import WSGIServer
 from flask_restful import Resource, Api
 from Simulador import Simulador
@@ -42,8 +42,13 @@ class ArrancaHilo(Resource):
     def get(self):
         global s
 #        print("Tipo de S: " + str(type(s)), file=sys.stdout)
-        s = Simulador()
-        return s.arrancarSimulador()
+        if s == None:
+            s = Simulador()
+            s.arrancarSimulador()
+        else:
+            if s.getEstadoHilo() != "CORRIENDO":
+                s.arrancarSimulador()
+        return True
         
 class ParaHilo(Resource):
     def get(self):
@@ -108,6 +113,6 @@ api.add_resource(EstadoHilo, '/EstadoHilo/')
 
 if __name__ == '__main__':
     # Debug/Development
-    app.run(host="0.0.0.0", port=80, debug=True)
-    #http_server = WSGIServer(('', 80), app)
-    #http_server.serve_forever()
+#    app.run(host="0.0.0.0", port=80, debug=True)
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
