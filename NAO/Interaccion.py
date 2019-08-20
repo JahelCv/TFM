@@ -205,11 +205,9 @@ class Interaccion(object):
                         self.ac.accionDespedida(self.contador)
                         self.actualizarContador()
                         self.ultimaPalabra = "apágate"
-                        self.pararLoop = False
+                        self.pararLoop = False                        
     
         # Cuando se sale del bucle...
-        print 'Interaccion # Run: Sale del bucle'
+        self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
         self.ac.posicionParada()
-        print 'Interaccion # Run: Antes de SetThreadBlock'
         self.ac.setThreadBlock(False)
-        print 'Interaccion # Run: Despues de SetThreadBlock'

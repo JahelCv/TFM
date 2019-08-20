@@ -5,7 +5,6 @@
 
 import sys
 import time
-from threading import Thread
 from requests import exceptions
 
 from naoqi import ALProxy
@@ -13,7 +12,6 @@ from naoqi import ALBroker
 from naoqi import ALModule
 
 from AccionesNAO import AccionesNAO
-# TODO: Descomentar
 from DatosCompartidos import DatosCompartidos
 from SimuladorRemoto import SimuladorRemoto
 from DispatchMQTT import DispatchMQTT
@@ -85,6 +83,7 @@ class ServerModule(ALModule):
                 self.memory.unsubscribeToEvent("WordRecognized", "Server")
                 self.asr.unsubscribe("Server")
                 self.dmqtt.pararMQTT()
+            self.simremoto.paraSimuladorRemoto()
             self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
             self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
             self.ac.decirFrase('No se ha podido conectar con el servicio en la nube, detengo el proceso.')
@@ -96,6 +95,7 @@ class ServerModule(ALModule):
                 self.memory.unsubscribeToEvent("WordRecognized", "Server")
                 self.asr.unsubscribe("Server")
                 self.dmqtt.pararMQTT()
+            self.simremoto.paraSimuladorRemoto()
             self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
             self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
             self.ac.decirFrase('Ha ocurrido algún problema, detengo el proceso.')
@@ -134,6 +134,7 @@ def main():
             Server.memory.unsubscribeToEvent("WordRecognized", "Server")
             Server.asr.unsubscribe("Server")
             Server.dmqtt.pararMQTT()
+        Server.simremoto.paraSimuladorRemoto()
         Server.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
         Server.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
         Server.ac.decirFrase('Corto el módulo manualmente.')
@@ -146,6 +147,7 @@ def main():
             Server.memory.unsubscribeToEvent("WordRecognized", "Server")
             Server.asr.unsubscribe("Server")
             Server.dmqtt.pararMQTT()
+        Server.simremoto.paraSimuladorRemoto()
         Server.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,PARADO")
         Server.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
         Server.ac.decirFrase('Ha ocurrido algún problema, detengo el proceso.')

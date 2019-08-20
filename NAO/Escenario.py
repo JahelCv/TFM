@@ -18,6 +18,8 @@ class Escenario(object):
         self.datos = d
         self.acNAO = ac
         self.simremoto = r
+        self.respEspera = 1
+        self.palabraRec = ""
     
     def setDatosCompartidos(self, d):
         self.datos = d
@@ -61,26 +63,29 @@ class Escenario(object):
                 'dime tu glucosa']
         
     def getWordlistFase3(self):
-        if self.estado == 1:
+        if self.estado == 1 or self.estado == 3:
             return ['hola','adios','como te llamas','que tal estás','sientate',
                     'levantate','choca el puño','salta','tumbate','toma un zumo',
                     'come un bocata','come una pizza','haz deporte',
                     'dime tu glucosa']
         elif self.estado == 2:
-            return ['si','no','dime tu glucosa']
-        elif self.estado == 3:
-            return ['toma un zumo','come un bocata','come una pizza',
-                    'haz deporte','dime tu glucosa']
+            return ['si','no','dime tu glucosa','hola','adios','como te llamas','que tal estás','sientate',
+                    'levantate','choca el puño','salta','tumbate','toma un zumo',
+                    'come un bocata','come una pizza','haz deporte']
+#        elif self.estado == 3:
+#            return ['hola','adios','como te llamas','que tal estás','sientate',
+#                    'levantate','choca el puño','salta','tumbate','toma un zumo',
+#                    'come un bocata','come una pizza','haz deporte','dime tu glucosa']
         return []
         
     def fase3(self):
         cho = 0
         bolus = 0
-        respEspera = 1
-        palabraRec = ""
+#        respEspera = 1
+#        palabraRec = ""
         self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 3 \nEstado: " 
             + str(self.estado) + " \nNumero random: " +str(self.numerorandom)
-            + "\nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: "
+            + "\nPalabra recibida: " + str(self.palabraRec) + " \nPalabra anterior: "
             + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
         
         ################################################
@@ -110,10 +115,8 @@ class Escenario(object):
             self.acNAO.decirFrase('Mi glucosa es baja')
             
             # En C++ esto era un switch
-            # case 1:
             if self.estado == 1:
                 pass
-            # case 2:
             elif self.estado == 2:
                 self.acNAO.accionMedirGlucosa();
                 self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor ' + str(self.mirarGlucosa()))
@@ -123,21 +126,15 @@ class Escenario(object):
                 elif self.numerorandom == 2: 
                     self.acNAO.decirFrase('El medico me recomienda que me pinche más insulina, ¿tú crees que es correcto?')
                     self.estado = 2
-            # case 3:
             elif self.estado == 3:
                 self.acNAO.decirFrase('Ahora debo esperar a que lo que me he hecho haga efecto en mi.')
-                if (time.time() - self.tiempoUltimaPeticionSimu) < 60:
+                if (time.time() - self.tiempoUltimaPeticionSimu) > 60:
                     # Glucosa sube
                     if self.glucosa[0] > self.glucosa[3]:
                         self.acNAO.decirFrase('Mi glucosa está subiendo, aunque sigue siendo baja. Debo esperar un ratito más.')
                     # Glucosa baja
                     elif self.glucosa[0] < self.glucosa[3]:
                         self.acNAO.decirFrase('Algo va mal. Mi glucosa es baja y continua bajando. Debo tomar medidas.')
-                        self.estado = 1
-                        
-                    # Glucosa normal ya?
-                    if self.glucosa[0] > 70 and self.glucosa[0] < 140:
-                        self.acNAO.decirFrase('Espera, ya me encuentro muy bien, me ha venido bien comer algo.')
                         self.estado = 1
                         
         # Glucosa alta, pero no mucho
@@ -159,18 +156,13 @@ class Escenario(object):
             elif self.estado == 3:
                 self.acNAO.decirFrase('Ahora debo esperar a que lo que me he hecho haga efecto en mi.')
                 if (time.time() - self.tiempoUltimaPeticionSimu) > 60:
-                    # Glucosa normal ya?
-                    if self.glucosa[0] > 70 and self.glucosa[0] < 140:
-                        self.acNAO.decirFrase('Espera, ya me encuentro muy bien, me ha venido bien comer algo.')
+                    # Glucosa sube
+                    if self.glucosa[0] > self.glucosa[3]:
+                        self.acNAO.decirFrase('Algo va mal. Mi glucosa es alta y continua subiendo. Debo tomar medidas.')
                         self.estado = 1
-                    else:
-                        # Glucosa sube
-                        if self.glucosa[0] > self.glucosa[3]:
-                            self.acNAO.decirFrase('Algo va mal. Mi glucosa es alta y continua subiendo. Debo tomar medidas.')
-                            self.estado = 1
-                        # Glucosa baja
-                        elif self.glucosa[0] < self.glucosa[3]:
-                            self.acNAO.decirFrase('Mi glucosa está bajando, aunque sigue siendo alta. Debo esperar un ratito más.')
+                    # Glucosa baja
+                    elif self.glucosa[0] < self.glucosa[3]:
+                        self.acNAO.decirFrase('Mi glucosa está bajando, aunque sigue siendo alta. Debo esperar un ratito más.')
                         
         # Glucosa MUY alta
         elif self.glucosa[0] > 180:
@@ -179,8 +171,8 @@ class Escenario(object):
             self.acNAO.setLedsOjosRed(True);
             self.acNAO.decirFrase('Tengo la glucosa peligrosamente alta.')
             
-            # Si ha pasado >50 segundos desde la ultima actu...
-            if (time.time() - self.tiempoUltimaPeticionSimu) > 50:
+            # Si ha pasado mas de 50 segundos desde la ultima actu...
+            if (time.time() - self.tiempoUltimaPeticionSimu) > 45:
                 # Y la insulina sigue creciendo...                
                 if self.glucosa[0] > self.glucosa[2]:
                     self.acNAO.accionMedirGlucosa();
@@ -193,14 +185,12 @@ class Escenario(object):
                     bolus = (cho/30)+(0.027/6)*(self.glucosa[0]-90)-0
                     self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time.time()
-                
-                # Si no sigue creciendo pero el tiempo que ha pasado es <50 sec
-                elif (time.time() - self.tiempoUltimaPeticionSimu) < 50:
+                else:
                     self.acNAO.accionMedirGlucosa();
                     self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor ' + str(self.mirarGlucosa()))
                     self.acNAO.decirFrase('Es muy alta pero como está disminuyendo voy a esperar un poco.')
                     self.estado = 3
-            # Si no han pasado >50 segundos desde la ultima actu...
+            # Si han pasado menos de 50 segundos desde la ultima actu...
             else:
                 self.acNAO.accionMedirGlucosa();
                 self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor ' + str(self.mirarGlucosa()))
@@ -210,41 +200,43 @@ class Escenario(object):
         ################################################
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
-        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase3(),15)
+        if self.respEspera == 1:
+            self.ultimaPalabra == self.palabraRec
+        (self.respEspera,exac,self.palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase3(),15)
         self.dmqtt.publicaVentanaEscenarioMQTT("##### Despues de esperarPalabra ##### \nFase: 3 \nEstado: " 
             + str(self.estado) + "\nNumero random: " +str(self.numerorandom)
-            + "\nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: "
+            + "\nPalabra recibida: " + str(self.palabraRec) + " \nPalabra anterior: "
             + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
         
         # Interpretamos respuesta, que si es correcta actuamos
-        if respEspera == -1 or respEspera == -2:
+        if self.respEspera == -1 or self.respEspera == -2:
             pass
-        elif respEspera == 1:
+        elif self.respEspera == 1:
             # Acciones segun el estado en que estemos: 1,2,3
             # Case estado = 1
             if self.estado == 1:
                 # Se mira que palabra (orden) se ha recibido
-                if palabraRec == 'hola':
+                if self.palabraRec == 'hola':
                     self.acNAO.accionSaludo(self.contador)
                     self.actualizarContador()
                     self.ultimaPalabra = 'hola'
                     
-                if palabraRec == 'adios':
+                if self.palabraRec == 'adios':
                     self.acNAO.accionDespedida(self.contador)
                     self.actualizarContador()
                     self.ultimaPalabra = 'adios'
                     
-                if palabraRec == 'como te llamas':
+                if self.palabraRec == 'como te llamas':
                     self.acNAO.decirFrase('Mi nombre es Andy, y soy el robot humanoide con diabetes del instituto aídos de la Universidad Politécnica de Valencia.')
                     self.ultimaPalabra = 'como te llamas'
                     time.sleep(1)
                     
-                if palabraRec == 'que tal estas':
+                if self.palabraRec == 'que tal estas':
                     self.acNAO.accionQUETALESTAS(self.contador);
                     self.actualizarContador()
                     self.ultimaPalabra = 'que tal estas'
                     
-                if palabraRec == 'sientate':
+                if self.palabraRec == 'sientate':
                     if self.ultimaPalabra == 'sientate':
                         self.acNAO.decirFrase('Pero si ya estoy sentado...')
                     else:
@@ -263,7 +255,7 @@ class Escenario(object):
                     self.ultimaPostura = 'sientate'
                     time.sleep(1)
                     
-                if palabraRec == 'levantate':
+                if self.palabraRec == 'levantate':
                     if self.ultimaPostura == 'sientate':
                         self.acNAO.decirFrase('Pero si me acabo de sentar...')
                         self.acNAO.accionLevantarse()
@@ -277,19 +269,19 @@ class Escenario(object):
                     else:
                         self.acNAO.decirFrase('Pero si ya estoy en pie...')
                         
-                if palabraRec == 'choca el puño':
+                if self.palabraRec == 'choca el puño':
                     self.acNAO.decirFrase('Choca ese puño colega.')
                     self.acNAO.accionChocarMano()
                     self.ultimaPalabra = 'choca el puño'
                     
-                if palabraRec == 'salta':
+                if self.palabraRec == 'salta':
                     if self.ultimaPalabra == 'salta':
                         self.acNAO.decirFrase('Estás pesadíto con el tema...')
                     else:
                         self.acNAO.decirFrase('¿Estás loco? Si salto seguro que me hago daño, mejor en otra ocasión.')
                         self.ultimaPalabra = 'salta'
                         
-                if palabraRec == 'tumbate':
+                if self.palabraRec == 'tumbate':
                     if self.ultimaPalabra == 'tumbate':
                         self.acNAO.decirFrase('Pero si ya estoy tumbado...')
                     else:
@@ -308,7 +300,7 @@ class Escenario(object):
                     self.ultimaPostura = 'tumbate'
                     self.acNAO.decirFrase('Despiertame dentro de 5 minutitos.')
                     
-                if palabraRec == 'toma un zumo':
+                if self.palabraRec == 'toma un zumo':
                     self.acNAO.decirFrase('Primero voy a medir mi glucosa.')
                     self.acNAO.accionMedirGlucosa()
                     self.acNAO.decirFrase('Ahora mismo es de valor ' + str(self.mirarGlucosa()))
@@ -332,7 +324,7 @@ class Escenario(object):
                     self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time.time()
                     
-                if palabraRec == 'come un bocata':
+                if self.palabraRec == 'come un bocata':
                     self.acNAO.decirFrase('Primero voy a medir mi glucosa.')
                     self.acNAO.accionMedirGlucosa()
                     self.acNAO.decirFrase('Ahora mismo es de valor ' + str(self.mirarGlucosa()))
@@ -356,7 +348,7 @@ class Escenario(object):
                     self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time.time()
                     
-                if palabraRec == 'come una pizza':
+                if self.palabraRec == 'come una pizza':
                     self.acNAO.decirFrase('Primero voy a medir mi glucosa.')
                     self.acNAO.accionMedirGlucosa()
                     self.acNAO.decirFrase('Ahora mismo es de valor ' + str(self.mirarGlucosa()))
@@ -380,7 +372,7 @@ class Escenario(object):
                     self.simremoto.enviaDatosSimulacion(bolus,cho,False,0,0,0)
                     self.tiempoUltimaPeticionSimu = time.time()
                     
-                if palabraRec == 'haz deporte':
+                if self.palabraRec == 'haz deporte':
                     self.acNAO.decirFrase('Primero voy a medir mi glucosa.')
                     self.acNAO.accionMedirGlucosa()
                     self.acNAO.decirFrase('Ahora mismo es de valor ' + str(self.mirarGlucosa()))
@@ -412,7 +404,7 @@ class Escenario(object):
                     
             # Case estado = 2
             elif self.estado == 2:
-                if palabraRec == 'si':
+                if self.palabraRec == 'si':
                     # Si glucosa baja
                     if self.glucosa[0] < 70:
                         if self.numerorandom == 1:
@@ -443,7 +435,7 @@ class Escenario(object):
                         self.acNAO.decirFrase('¿De verdad crees que sí?. Lo cierto es que ya me encuentro mejor, creo que mi glucosa se está normalizando.')
                         self.estado = 1
                         
-                if palabraRec == 'no':
+                elif self.palabraRec == 'no':
                     # Si glucosa baja
                     if self.glucosa[0] < 70:
                         if self.numerorandom == 1:
@@ -473,21 +465,26 @@ class Escenario(object):
                         self.acNAO.decirFrase('¿De verdad crees que no?. Lo cierto es que ya me encuentro mejor, creo que mi glucosa se está normalizando.')
                         self.estado = 1
                 
+                else:
+                    self.acNAO.decirFrase('Espera, primero contesta a mi pregunta.')
+                
             # Case estado = 3
             elif self.estado == 3:
-                if palabraRec == 'toma un zumo' or palabraRec == 'come un bocata' or palabraRec == 'come una pizza':
+                if self.palabraRec == 'toma un zumo' or self.palabraRec == 'come un bocata' or self.palabraRec == 'come una pizza':
                     self.acNAO.decirFrase('Si tomo algo me subirá más el azucar, debo esperar a que se normalice porque ya he tomado medidas.')
-                elif palabraRec == 'haz deporte':
+                elif self.palabraRec == 'haz deporte':
                     self.acNAO.decirFrase('Dame un respiro amigo, debo esperar a estar bien para poder hacer ejercicio de nuevo.')
+                else:
+                    self.acNAO.decirFrase('Debo esperar a que mi nivel de glucosa se normalice porque ya he tomado medidas.')                    
         
     def fase2(self):
         cho = 0
         bolus = 0
         aux = 0
-        palabraRec = ""
+#        palabraRec = ""
         print('Ejecuto fase2, glucosa actual: ' + str(self.glucosa[0]) )
         self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 2 \nNumero random: " 
-            +str(self.numerorandom) + " \nPalabra recibida: " + str(palabraRec) 
+            +str(self.numerorandom) + " \nPalabra recibida: " + str(self.palabraRec) 
             + " \nPalabra anterior: " + str(self.ultimaPalabra) + " \nContador: " 
             + str(self.contador))
 
@@ -555,12 +552,12 @@ class Escenario(object):
         ################################################
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
-        (respEspera,exac,palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase2(),10)
+        (self.respEspera,exac,self.palabraRec) = self.acNAO.esperarPalabra(self.getWordlistFase2(),10)
     
         # Interpretamos respuesta, que si es correcta actuamos
-        if respEspera == -1 or respEspera == -2:
+        if self.respEspera == -1 or self.respEspera == -2:
             print 'respEspera - Respuesta negativa'
-        elif respEspera == 1:
+        elif self.respEspera == 1:
             
             if exac < self.exactitud:
                 print 'respEspera - Exactitud no suficiente'
@@ -568,10 +565,10 @@ class Escenario(object):
             else:
                 self.dmqtt.publicaVentanaEscenarioMQTT("##### Palabra entendida ##### \nFase: 2 \nEstado: " 
                     + str(self.estado) + " \nNumero random: " +str(self.numerorandom) 
-                    + " \nPalabra recibida: " + str(palabraRec) + " \nPalabra anterior: " 
+                    + " \nPalabra recibida: " + str(self.palabraRec) + " \nPalabra anterior: " 
                     + str(self.ultimaPalabra) + " \nContador: " + str(self.contador))
-                print 'respEspera - Respuesta entendida' + palabraRec
-                if palabraRec == 'vamos a hacer deporte':
+                print 'respEspera - Respuesta entendida' + self.palabraRec
+                if self.palabraRec == 'vamos a hacer deporte':
                     self.ultimaPalabra = 'vamos a hacer deporte'
                     if self.numEjercicio == 1:
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
@@ -618,14 +615,14 @@ class Escenario(object):
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte.')
                         self.numEjercicio = self.numEjercicio + 1
                         
-                elif palabraRec == 'dime tu glucosa':
+                elif self.palabraRec == 'dime tu glucosa':
                     print 'Escenario - Orden de decir glucosa'
                     self.acNAO.decirFrase('Voy medir mi glucosa.')
                     aux = self.mirarGlucosa()
                     self.acNAO.accionMedirGlucosa()
                     self.acNAO.decirFrase('Ahora mismo tengo ' + str(aux))
                         
-                elif palabraRec == 'tienes hambre':
+                elif self.palabraRec == 'tienes hambre':
                     self.ultimaPalabra = 'tienes hambre'
                     if self.numHambre == 1:
                         self.acNAO.decirFrase('Sí, la verdad es que estoy muerto de hambre. Dentro de dos horas tengo clase de gimnasia, así que voy a comer ahora lo que me han preparado en mi casa')
@@ -676,7 +673,7 @@ class Escenario(object):
                     else:
                         self.acNAO.decirFrase('No, la verdad es que no tengo hambre.')
                         
-                elif palabraRec == 'avanza':
+                elif self.palabraRec == 'avanza':
                     self.acNAO.decirFrase('Cambiamos a la fase 3')
                     self.fase = 3
             
