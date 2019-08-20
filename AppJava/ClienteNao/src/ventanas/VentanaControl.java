@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import java.awt.GridBagConstraints;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import java.awt.Insets;
@@ -126,7 +127,8 @@ public class VentanaControl extends JFrame {
 	public VentanaControl(ConectaGCloud gcloud) {
 		
 		this.gcloud = gcloud;
-		//this.vv = _vv;
+		ImageIcon img = new ImageIcon("icono.jpg");
+		this.setIconImage(img.getImage());
 		
 		textPane = new JTextArea();
 		vSimulacion = new VentanaSimulacion(gcloud,textPane);

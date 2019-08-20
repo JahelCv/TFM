@@ -2,6 +2,8 @@ package ventanas;
 
 
 import java.awt.Dimension;
+
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -56,6 +58,8 @@ public class VentanaVisualizacion extends JFrame {
 	
 	@SuppressWarnings("serial")
 	public VentanaVisualizacion() {	
+		ImageIcon img = new ImageIcon("icono.jpg");
+		this.setIconImage(img.getImage());
 		setTitle("VentanaVisualizacion");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(700, 100, 804, 355);

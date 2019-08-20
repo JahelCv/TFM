@@ -18,6 +18,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.JCheckBox;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.SpinnerNumberModel;
 
@@ -45,8 +46,10 @@ public class VentanaSimulacion extends JFrame {
 	JTextArea textControl;
 
 	public VentanaSimulacion(ConectaGCloud _gcloud,JTextArea textPane) {
+		ImageIcon img = new ImageIcon("icono.jpg");
+		this.setIconImage(img.getImage());
 		this.gcloud = _gcloud;
-		this.textControl =textPane;
+		this.textControl = textPane;
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {

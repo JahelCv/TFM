@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import thread.Manager;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import ventanas.VentanaControl;
 import ventanas.VentanaVisualizacion;
@@ -55,6 +57,8 @@ public class MainWindow {
 
 	private void initialize() {
 		frmClienteNao = new JFrame();
+		ImageIcon img = new ImageIcon("icono.jpg");
+		frmClienteNao.setIconImage(img.getImage());
 		frmClienteNao.setTitle("Cliente GCloud");
 		frmClienteNao.setResizable(false);
 		frmClienteNao.setBounds(100, 100, 399, 140);

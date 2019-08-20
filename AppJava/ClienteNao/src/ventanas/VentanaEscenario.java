@@ -2,6 +2,7 @@ package ventanas;
 
 import java.awt.BorderLayout;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -30,6 +31,8 @@ public class VentanaEscenario extends JFrame {
 	private boolean auxEscenario;
 
 	public VentanaEscenario() {
+		ImageIcon img = new ImageIcon("icono.jpg");
+		this.setIconImage(img.getImage());
 		setAutoRequestFocus(false);
 		setResizable(false);
 		addWindowListener(new WindowAdapter() {
@@ -53,7 +56,7 @@ public class VentanaEscenario extends JFrame {
 		contentPane.add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));
 		
-		lblFase = new JLabel("Fase 2");
+		lblFase = new JLabel("Datos Escenario");
 		lblFase.setHorizontalAlignment(SwingConstants.CENTER);
 		lblFase.setFont(new Font("Tahoma", Font.BOLD, 14));
 		panel.add(lblFase);
