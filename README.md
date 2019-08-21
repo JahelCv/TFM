@@ -1,0 +1,3 @@
+En este proyecto se desarrollan servicios en la nube para desacoplar de dentro del robot NAO el código que ejecuta el simulador de diabetes que lleva implementado. Se suprimen las conexiones TCP por protocolos de capas superiores en la pila TCP/IP como son HTTP y MQTT que permiten una comunicación más flexible y con más opciones. Además, se moderniza el código para que sea más sencilla tanto su estructura como su compilación y ejecución.
+
+El proyecto anterior se encuentra publicado aquí https://riunet.upv.es/bitstream/handle/10251/94065/BENGOCHEA\%20-\%20Desarrollo\%20de\%20un\%20sistema\%20de\%20monitorizaci\%C3\%B3n\%20y\%20control\%20de\%20un\%20robot\%20simulador\%20de\%20diabetes.pdf?sequence=3
