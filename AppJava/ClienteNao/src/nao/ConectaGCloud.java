@@ -14,26 +14,18 @@ import java.net.URLEncoder;
 public class ConectaGCloud {
 
 	// Rutas para el simulador del GCE
-	String urlmod = "ModoSimulador/";
-	String urlglu = "Glucosa/";
-	String urlpara = "ParaHilo/";
-	String urldats = "DatosSimulacion/";
-	String urlarranca = "ArrancaHilo/";
-	String urlpausa = "PausaHilo/";
-	String urldespausa = "DespausaHilo/";
-	String urlestadohilo = "EstadoHilo/";
+	String urlmod = "Simulador/Modo/";
+	String urlglu = "Simulador/Glucosa/";
+	String urldats = "Simulador/DatosSimulacion/";
+	String urlhilo = "Hilo/";
 	private String gce_rootip = null;
 	
 	public ConectaGCloud(String ip) {
-		gce_rootip = "http://" + ip + ":5000/";
+		gce_rootip = "http://" + ip + ":8080/";
 		urlmod = gce_rootip + urlmod;
 		urlglu = gce_rootip + urlglu;
-		urlpara = gce_rootip + urlpara;
 		urldats = gce_rootip + urldats;
-		urlarranca = gce_rootip + urlarranca;
-		urlpausa = gce_rootip + urlpausa;
-		urldespausa = gce_rootip + urldespausa;
-		urlestadohilo = gce_rootip + urlestadohilo;
+		urlhilo = gce_rootip + urlhilo;
 
 	}
 
@@ -74,51 +66,66 @@ public class ConectaGCloud {
 		return ret;
 	}
 
-	public boolean GETArranca_GCE() {
-		return this.simpleGET(urlarranca);
+	public boolean PUTArranca_GCE() {
+		return this.simplePUT("CORRIENDO");
 	}
 
-	public boolean GETPara_GCE() {
-		return this.simpleGET(urlpara);
+	public boolean PUTPara_GCE() {
+		return this.simplePUT("PARADO");
 	}
 
-	public boolean GETPausa_GCE() {
-		return this.simpleGET(urlpausa);
+	public boolean PUTPausa_GCE() {
+		return this.simplePUT("PAUSADO");
 	}
 
-	public boolean GETDespausa_GCE() {
-		return this.simpleGET(urldespausa);
+	public boolean PUTDespausa_GCE() {
+		return this.simplePUT("CORRIENDO");
 	}
 
-	public boolean simpleGET(String urlp) {
-		HttpURLConnection con = null;
+	public boolean simplePUT(String s) {
+		System.out.println("Inicia PUT a HILO");
 		boolean ret = false;
+		String urlParameters = "";
+		HttpURLConnection httpCon = null;
 		try {
-			URL url = new URL(urlp);
-			con = (HttpURLConnection) url.openConnection();
-			con.setRequestMethod("GET");
-			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-			String inputLine;
-			StringBuffer content = new StringBuffer();
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
+			urlParameters = "data=" + URLEncoder.encode(s, "UTF-8");
+			URL url = new URL(urlhilo);
+			httpCon = (HttpURLConnection) url.openConnection();
+			httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			httpCon.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+			httpCon.setDoOutput(true);
+			httpCon.setDoInput(true);
+			httpCon.setUseCaches(false);
+			httpCon.setRequestMethod("PUT");
+
+			// Send request
+			DataOutputStream wr = new DataOutputStream(httpCon.getOutputStream());
+			wr.writeBytes(urlParameters);
+			wr.flush();
+			wr.close();
+
+			// Get response
+			InputStream is = httpCon.getInputStream();
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			String line;
+			StringBuffer response = new StringBuffer();
+			while ((line = rd.readLine()) != null) {
+				response.append(line);
+				response.append('\r');
 			}
-			in.close();
-
-			System.out.println("Recibido de " + gce_rootip + ": " + content);
-			System.out.println("Codigo respuesta de PUT: " + con.getResponseCode());
-
-			con.disconnect();
+			rd.close();
+			/*System.out.println("Respuesta de Flask: " + response.toString());
+			System.out.println("Codigo respuesta de PUT: " + httpCon.getResponseCode());*/
+			httpCon.disconnect();
 			ret = true;
-		} catch (ConnectException e) {
+			System.out.println("Termina PUT a HILO");
+
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
-			if (con != null)
-				con.disconnect();
-		} catch (Exception e) {
-			e.printStackTrace();
-			if (con != null)
-				con.disconnect();
 		}
+
 		return ret;
 	}
 
@@ -162,7 +169,7 @@ public class ConectaGCloud {
 		HttpURLConnection con = null;
 		String ret = null;
 		try {
-			URL url = new URL(urlestadohilo);
+			URL url = new URL(urlhilo);
 			con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -200,13 +207,6 @@ public class ConectaGCloud {
 		String urlParameters = "";
 		String json = "{\'bolus\' : " + bolus + ", \'cho\' : " + cho + ", \'ejercicio\' :" + ejer + ", \'exercise\' : ["
 				+ ejerT + "," + ejerD + "," + ejerI + "]}";
-		// String json = "{\'bolus\' : "+bolus+", \'cho\' : "+cho+", \'ejercicio\' :
-		// "+ejer+"}";
-		/*
-		 * String json = "{ \"data\": { \"bolus\" : " + bolus + ", \"cho\" : " + cho +
-		 * ", \"ejercicio\" : " + aux + ", \"exercise\" : [" + ejerT + "," + ejerD + ","
-		 * + ejerI + "]}}";
-		 */
 		try {
 			urlParameters = "data=" + URLEncoder.encode(json, "UTF-8");
 			URL url = new URL(urldats);

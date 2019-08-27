@@ -539,7 +539,7 @@ public class VentanaControl extends JFrame {
 				if(hilo.getEstado().equals("PAUSADO")){ //pausado
 					pausar.setEnabled(false);
 					despausar.setEnabled(true);
-					parar.setEnabled(true);
+					parar.setEnabled(false);
 					arrancar.setEnabled(false);
 				}
 				if(SwingUtilities.isRightMouseButton(arg0) && index == list.locationToIndex(arg0.getPoint())){
@@ -627,7 +627,7 @@ public class VentanaControl extends JFrame {
 					if (hilo.getNombre() != "SIMULACION") {
 						c.publishMessageNaoHilos(hilo.getNombre()+",PAUSADO");
 					}
-					else gcloud.GETPausa_GCE();
+					else gcloud.PUTPausa_GCE();
 				}
 			}
 		});
@@ -641,7 +641,7 @@ public class VentanaControl extends JFrame {
 					if (hilo.getNombre() != "SIMULACION") {
 						c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
 					}
-					else gcloud.GETDespausa_GCE();
+					else gcloud.PUTDespausa_GCE();
 				}
 			}
 		});
@@ -655,7 +655,7 @@ public class VentanaControl extends JFrame {
 					if (hilo.getNombre() != "SIMULACION") {
 						c.publishMessageNaoHilos(hilo.getNombre()+",PARADO");
 					}
-					else gcloud.GETPara_GCE();
+					else gcloud.PUTPara_GCE();
 				}
 			}
 		});
@@ -670,7 +670,7 @@ public class VentanaControl extends JFrame {
 					if (hilo.getNombre() != "SIMULACION") {
 						c.publishMessageNaoHilos(hilo.getNombre()+",CORRIENDO");
 					}
-					else gcloud.GETArranca_GCE();
+					else gcloud.PUTArranca_GCE();
 				}
 			}
 		});

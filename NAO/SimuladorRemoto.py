@@ -5,14 +5,10 @@ from threading import Lock
 class SimuladorRemoto:
     def __init__(self):
         self.mutex = Lock()
-        self.urlroot = "http://34.76.240.69:5000/"
-        self.urlmod = "http://34.76.240.69:5000/ModoSimulador/"
-        self.urlglu = "http://34.76.240.69:5000/Glucosa/"
-        self.urlpara = "http://34.76.240.69:5000/ParaHilo/"
-        self.urldats = "http://34.76.240.69:5000/DatosSimulacion/"
-        self.urlarranca = "http://34.76.240.69:5000/ArrancaHilo/"
-        self.urlpausa = "http://34.76.240.69:5000/PausaHilo/"
-        self.urldespausa = "http://34.76.240.69:5000/DespausaHilo/"
+        self.urlroot = "http://34.76.240.69:8080/"
+        self.urlglu = "http://34.76.240.69:8080/Simulador/Glucosa/"
+        self.urldats = "http://34.76.240.69:8080/Simulador/DatosSimulacion/"
+        self.urlhilo = "http://34.76.240.69:8080/Hilo/"
     
     def getGlucosaRemoto(self):
         self.mutex.acquire()
@@ -22,21 +18,39 @@ class SimuladorRemoto:
         
     def arrancaSimuladorRemoto(self):
         self.mutex.acquire()
-        r = requests.get(self.urlarranca)
+        r = requests.put(self.urlhilo, data={'data': "CORRIENDO"})
         self.mutex.release()
-        return r.content
+        if r.ok:
+            return True
+        else:
+            return False
         
     def pausaSimuladorRemoto(self):
         self.mutex.acquire()
-        r = requests.get(self.urlpausa)
+        r = requests.put(self.urlhilo, data={'data': "PAUSADO"})
         self.mutex.release()
-        return r.content
+        if r.ok:
+            return True
+        else:
+            return False
+            
+    def despausaSimuladorRemoto(self):
+        self.mutex.acquire()
+        r = requests.put(self.urlhilo, data={'data': "CORRIENDO"})
+        self.mutex.release()
+        if r.ok:
+            return True
+        else:
+            return False
         
     def paraSimuladorRemoto(self):
         self.mutex.acquire()
-        r = requests.get(self.urlpara)
+        r = requests.put(self.urlhilo, data={'data': "PARADO"})
         self.mutex.release()
-        return r.content
+        if r.ok:
+            return True
+        else:
+            return False
     
     def enviaDatosSimulacion(self, b, c, e, e0, e1, e2):
         self.mutex.acquire()

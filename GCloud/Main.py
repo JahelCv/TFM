@@ -15,6 +15,45 @@ class HelloWorld(Resource):
     def get(self):
         return "Bienvenido!"
         
+class Hilo(Resource):
+    def get(self):
+        global s
+        if s == None:
+            return "PARADO"
+        else:
+            return s.getEstadoHilo()
+            
+    # PARADO, PAUSADO, CORRIENDO
+    def put(self):
+        global s
+        if request.form['data'] == "PARADO":
+            if s != None:
+                return s.pararSimulador()
+                del s
+                s = None
+            else:
+                return False
+            
+        elif request.form['data'] == "PAUSADO":
+            if s != None:
+                return s.pausarSimulador()
+            else:
+                return False
+            
+        elif request.form['data'] == "CORRIENDO":
+            if s == None:
+                s = Simulador()
+                s.arrancarSimulador()
+            else:
+                if s.getEstadoHilo() == "PARADO":
+                    s.arrancarSimulador()
+                elif s.getEstadoHilo() == "PAUSADO":
+                    s.despausarSimulador()
+            return True
+            
+        return False
+        
+        
 class ModoSimulador(Resource):
     def get(self):
         global s
@@ -31,57 +70,13 @@ class Glucosa(Resource):
         if s != None:
             return s.getGlucosa()
         else:
-            return False
-    def put(self):
-        global s
-        print('Hace un put con dato: ', file=sys.stdout)
-        print(str(request.form['data']),file=sys.stdout)
-        return s.setGlucosa(request.form['data'])
-        
-class ArrancaHilo(Resource):
-    def get(self):
-        global s
-#        print("Tipo de S: " + str(type(s)), file=sys.stdout)
-        if s == None:
-            s = Simulador()
-            s.arrancarSimulador()
-        else:
-            if s.getEstadoHilo() != "CORRIENDO":
-                s.arrancarSimulador()
-        return True
-        
-class ParaHilo(Resource):
-    def get(self):
-        global s
-        if s != None:
-#            print("Tipo de S: " + str(type(s)), file=sys.stdout)
-#            print("ParaHilo: S no es none por tanto paro y borro", file=sys.stdout)
-            return s.pararSimulador()
-            del s
-            s = None
-        else:
-            return False
-        
-class PausaHilo(Resource):
-    def get(self):
-        global s
-        if s != None:
-            return s.pausarSimulador()
-        else:
-            return False
-        
-class DespausaHilo(Resource):
-    def get(self):
-        global s
-        if s != None:
-            return s.despausarSimulador()
-        else:
-            return False
-        
+            return False        
+
 class DatosSimulacion(Resource):
     def get(self):
         global s
         return s.getDatosSimulacion()
+        
     def put(self):
         global s
         content = request.form['data']
@@ -91,28 +86,13 @@ class DatosSimulacion(Resource):
             return s.setDatosSimulacion(jsoncont)
         else:
             return False
-        
-class EstadoHilo(Resource):
-    def get(self):
-        global s
-#        print("Tipo de S: " + str(type(s)), file=sys.stdout)
-        if s == None:
-            return "PARADO"
-        else:
-            return s.getEstadoHilo()
 
 api.add_resource(HelloWorld, '/')
-api.add_resource(ArrancaHilo, '/ArrancaHilo/')
-api.add_resource(ParaHilo, '/ParaHilo/')
-api.add_resource(PausaHilo, '/PausaHilo/')
-api.add_resource(DespausaHilo, '/DespausaHilo/')
-api.add_resource(ModoSimulador, '/ModoSimulador/')
-api.add_resource(Glucosa, '/Glucosa/')
-api.add_resource(DatosSimulacion, '/DatosSimulacion/')
-api.add_resource(EstadoHilo, '/EstadoHilo/')
+api.add_resource(Hilo, '/Hilo/')
+api.add_resource(ModoSimulador, '/Simulador/Modo/')
+api.add_resource(Glucosa, '/Simulador/Glucosa/')
+api.add_resource(DatosSimulacion, '/Simulador/DatosSimulacion/')
 
 if __name__ == '__main__':
-    # Debug/Development
-#    app.run(host="0.0.0.0", port=80, debug=True)
-    http_server = WSGIServer(('', 5000), app)
+    http_server = WSGIServer(('', 8080), app)
     http_server.serve_forever()
