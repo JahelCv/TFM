@@ -15,8 +15,17 @@
 \contentsline {figure}{\numberline {2.3}{\ignorespaces Productos de Google Cloud.\relax }}{7}{figure.caption.10}% 
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Ejemplo del funcionamiento de MQTT.\relax }}{12}{figure.caption.14}% 
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Clases de anterior proyecto en el c\IeC {\'o}digo de NAO.\relax }}{18}{figure.caption.16}% 
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Tabla comparativa de lenguajes de programaci\IeC {\'o}n en NAO.\relax }}{19}{figure.caption.17}% 
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Diagrama de clases del c\IeC {\'o}digo de NAO actualmente.\relax }}{19}{figure.caption.18}% 
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Diagrama de clases del cliente Java.\relax }}{23}{figure.caption.19}% 
 \addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Partes del proyecto conectadas.\relax }}{27}{figure.caption.20}% 
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Ventana de arranque de la aplicaci\IeC {\'o}n Java.\relax }}{28}{figure.caption.21}% 
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Ventana de control al iniciar la aplicaci\IeC {\'o}n Java.\relax }}{29}{figure.caption.22}% 
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Ventana de visualizaci\IeC {\'o}n del nivel de glucosa al iniciar la aplicaci\IeC {\'o}n Java.\relax }}{29}{figure.caption.23}% 
+\contentsline {figure}{\numberline {5.5}{\ignorespaces Ventana de control en Java al haber iniciado el c\IeC {\'o}digo de NAO.\relax }}{30}{figure.caption.24}% 
+\contentsline {figure}{\numberline {5.6}{\ignorespaces Ventana de visualizaci\IeC {\'o}n en Java del nivel de glucosa al haber arrancado el simulador desde NAO.\relax }}{30}{figure.caption.25}% 
+\contentsline {figure}{\numberline {5.7}{\ignorespaces Ventana de escenario, para visualizar las variables de control durante la ejecuci\IeC {\'o}n del hilo excluyente Escenario.\relax }}{31}{figure.caption.26}% 
 \addvspace {10\p@ }

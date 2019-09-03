@@ -19,13 +19,13 @@ class DispatchMQTT(object):
         # Suscribimos
         self.mqttclient.subscribe("nao/decir")
         self.mqttclient.subscribe("nao/exacpalabra")
-        self.mqttclient.subscribe("nao/hilos")
+        self.mqttclient.subscribe("hilos")
         self.mqttclient.subscribe("nao/leds")
         self.mqttclient.subscribe("nao/mover")
         
     def publicaInterfazHilosMQTT(self, msg):
 #        print "Antes de hacer un publish"
-        self.mqttclient.publish("interfaz/hilos",msg)
+        self.mqttclient.publish("hilos",msg)
 #        print "Despues de hacer un publish"
         
     def publicaVentanaEscenarioMQTT(self, msg):

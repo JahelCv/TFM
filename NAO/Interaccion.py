@@ -69,7 +69,7 @@ class Interaccion(object):
         exac = 0
         self.wordlist = ["hola", "adios", "como te llamas", "que tal estás",
                          "sientate", "levantate", "choca el puño", "salta",
-                         "tumbate", "dime tu glucosa", "apágate"]
+                         "tumbate", "dime tu glucosa"]
         self.ac.setThreadBlock(True)
         self.ac.accionLevantarse()
         
@@ -199,13 +199,6 @@ class Interaccion(object):
                         self.ac.accionMedirGlucosa()
                         glu = str(self.mirarGlucosa())
                         self.ac.decirFrase("Ahora mismo mi glucosa es de valor " + glu)
-                    
-                    if palabraRec == "apágate":
-                        self.ac.decirFrase("Hasta pronto! Ha sido un placer conocerte.")
-                        self.ac.accionDespedida(self.contador)
-                        self.actualizarContador()
-                        self.ultimaPalabra = "apágate"
-                        self.pararLoop = False                        
     
         # Cuando se sale del bucle...
         self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")

@@ -19,13 +19,13 @@ class DispatchMQTT(object):
         # Suscribimos
         self.mqttclient.subscribe("nao/decir")
         self.mqttclient.subscribe("nao/exacpalabra")
-        self.mqttclient.subscribe("nao/hilos")
+        self.mqttclient.subscribe("hilos")
         self.mqttclient.subscribe("nao/leds")
         self.mqttclient.subscribe("nao/mover")
         
     def publicaInterfazHilosMQTT(self, msg):
 #        print "Antes de hacer un publish"
-        self.mqttclient.publish("interfaz/hilos",msg)
+        self.mqttclient.publish("hilos",msg)
 #        print "Despues de hacer un publish"
         
     def publicaVentanaEscenarioMQTT(self, msg):
@@ -47,8 +47,8 @@ class DispatchMQTT(object):
             if fmsg >= 0.1 and fmsg <= 0.9:
                 self.datos.modifyData("EXACPALABRA", fmsg)
         
-        elif message.topic == "nao/hilos":
-            print("Recibo en nao/hilos: ", str(message.payload.decode("utf-8")))
+        elif message.topic == "hilos":
+            print("Recibo en hilos: ", str(message.payload.decode("utf-8")))
             mensaje = str(message.payload.decode("utf-8"))
             lmensaje = mensaje.split(',')
             if lmensaje[1] == "PARADO":

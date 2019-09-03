@@ -25,7 +25,7 @@ public class ConectaMQTT implements MqttCallback{
 		    connOpts.setUserName("nao");
 		    connOpts.setPassword("nao".toCharArray());
 			mqttc.connect(connOpts);
-			String[] topicsubs = {"interfaz/hilos","interfaz/ventanaescenario"};
+			String[] topicsubs = {"hilos","interfaz/ventanaescenario"};
 			mqttc.subscribe(topicsubs);
 			System.out.println("MQTT Conectado exitosamente");
 		} catch (MqttException e) {
@@ -48,7 +48,7 @@ public class ConectaMQTT implements MqttCallback{
 	@Override
 	public void messageArrived(String topic, MqttMessage msg) throws Exception {
 		System.out.println("Topic: "+ topic + " # Message: " + new String(msg.getPayload()));
-		if (topic.equals("interfaz/hilos")) {
+		if (topic.equals("hilos")) {
 			String[] msgsplitted = new String(msg.getPayload()).split(",");
 			m.setHiloNAO(msgsplitted[0], msgsplitted[1]);
 		} else if (topic.equals("interfaz/ventanaescenario")) {
@@ -91,7 +91,7 @@ public class ConectaMQTT implements MqttCallback{
 		MqttMessage mq = new MqttMessage();
 		mq.setPayload(message.getBytes());
 		try {
-			mqttc.publish("nao/hilos", mq);
+			mqttc.publish("hilos", mq);
 		} catch (MqttPersistenceException e) {
 			e.printStackTrace();
 		} catch (MqttException e) {

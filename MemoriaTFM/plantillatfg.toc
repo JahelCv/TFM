@@ -21,21 +21,22 @@
 \contentsline {subsection}{\numberline {2.3.1}HTTP}{8}{subsection.2.3.1}% 
 \contentsline {subsection}{\numberline {2.3.2}REST}{9}{subsection.2.3.2}% 
 \contentsline {subsection}{\numberline {2.3.3}HTTP y REST en este proyecto}{9}{subsection.2.3.3}% 
-\contentsline {section}{\numberline {2.4}MQTT}{11}{section.2.4}% 
+\contentsline {section}{\numberline {2.4}Sistema MQTT}{11}{section.2.4}% 
 \contentsline {subsection}{\numberline {2.4.1}Introducci\IeC {\'o}n a MQTT}{11}{subsection.2.4.1}% 
 \contentsline {subsection}{\numberline {2.4.2}MQTT en este proyecto}{13}{subsection.2.4.2}% 
-\contentsline {section}{\numberline {2.5}Librer\IeC {\'\i }a para el c\IeC {\'a}lculo diferencial}{13}{section.2.5}% 
-\contentsline {chapter}{\numberline {3}C\IeC {\'o}digo en NAO}{15}{chapter.3}% 
-\contentsline {chapter}{\numberline {4}Aplicaci\IeC {\'o}n Java}{17}{chapter.4}% 
-\contentsline {chapter}{\numberline {5}Relaci\IeC {\'o}n entre los componentes}{19}{chapter.5}% 
-\contentsline {section}{\numberline {5.1}?? ???? ???? ? ?? ??}{19}{section.5.1}% 
-\contentsline {chapter}{\numberline {6}Conclusions}{21}{chapter.6}% 
-\contentsline {section}{\numberline {6.1}Mejoras}{21}{section.6.1}% 
-\contentsline {section}{\numberline {6.2}Conclusiones}{21}{section.6.2}% 
-\contentsline {chapter}{Bibliograf\'{\i }a}{23}{chapter*.15}% 
-\noindent \hrulefill \par 
-\appendicesname \par 
-\contentsline {chapter}{\numberline {A}Configuraci\IeC {\'o} del sistema}{25}{appendix.Alph1}% 
-\contentsline {section}{\numberline {A.1}Fase d'inicialitzaci\IeC {\'o}}{25}{section.Alph1.1}% 
-\contentsline {section}{\numberline {A.2}Identificaci\IeC {\'o} de dispositius}{25}{section.Alph1.2}% 
-\contentsline {chapter}{\numberline {B}??? ???????????? ????}{27}{appendix.Alph2}% 
+\contentsline {section}{\numberline {2.5}Librer\IeC {\'\i }a para el c\IeC {\'a}lculo diferencial}{15}{section.2.5}% 
+\contentsline {chapter}{\numberline {3}C\IeC {\'o}digo en NAO}{17}{chapter.3}% 
+\contentsline {section}{\numberline {3.1}Problemas con el c\IeC {\'o}digo anterior}{17}{section.3.1}% 
+\contentsline {section}{\numberline {3.2}C\IeC {\'o}digo actual}{18}{section.3.2}% 
+\contentsline {subsection}{\numberline {3.2.1}Cambio a Python}{18}{subsection.3.2.1}% 
+\contentsline {subsection}{\numberline {3.2.2}Clases del c\IeC {\'o}digo en NAO}{19}{subsection.3.2.2}% 
+\contentsline {chapter}{\numberline {4}Aplicaci\IeC {\'o}n Java}{23}{chapter.4}% 
+\contentsline {section}{\numberline {4.1}MQTT en la aplicaci\IeC {\'o}n Java}{24}{section.4.1}% 
+\contentsline {section}{\numberline {4.2}HTTP en la aplicaci\IeC {\'o}n Java}{24}{section.4.2}% 
+\contentsline {chapter}{\numberline {5}Relaci\IeC {\'o}n entre los componentes}{27}{chapter.5}% 
+\contentsline {section}{\numberline {5.1}Jerarqu\IeC {\'\i }a de los componentes}{27}{section.5.1}% 
+\contentsline {section}{\numberline {5.2}Traza de ejecuci\IeC {\'o}n}{28}{section.5.2}% 
+\contentsline {chapter}{\numberline {6}Conclusiones}{33}{chapter.6}% 
+\contentsline {section}{\numberline {6.1}Posibles mejoras}{33}{section.6.1}% 
+\contentsline {section}{\numberline {6.2}Conclusiones}{34}{section.6.2}% 
+\contentsline {chapter}{Bibliograf\'{\i }a}{35}{chapter*.27}% 

@@ -161,7 +161,7 @@ El objetivo de este proyecto es \textbf{desengarzar la parte pesada del código 
 Esto implica una transformación total de la parte del código de NAO, que significa actualizar las partes del proyecto <<\textit{Desarrollo de un sistema de monitorización y control de un robot simulador de diabetes}>>. Se ha eliminado completamente TCP de la estructura del proyecto y se ha sustituido por MQTT o HTTP (REST), según necesidad. Las partes del proyecto por lo tanto necesitan estas modificaciones: 
 \begin{itemize}
 	\item Aplicación Java: En vez de utilizar una conexión TCP para conectarse al robot, deberá utilizar librerías para hacer llamadas HTTP y un cliente MQTT. 
-	\item La parte de NAO: Sufre un cambio radical ya que se debe cambiar de C++ a Python 2.7 \textbf{TODO: RELACIONAR CON LA PARTE QUE LO JUSTIFICO}(la versión que admite NAO), y se divide el proyecto en dos partes:
+	\item La parte de NAO: Sufre un cambio radical ya que se debe cambiar de C++ a Python 2.7 como se justifica en la sección \ref{CambioPython}, y se divide el proyecto en dos partes:
 		\subitem -- Google Cloud Engine: Se debe alquilar un servicio en la nube, en este caso del proveedor Google, y se montará un servidor que atenderá peticiones HTTP. Las responderá con el estado de la glucosa actualmente, ya que contendrá el simulador de diabetes.
 		\subitem -- Código en NAO: Se debe eliminar toda la parte del simulador y TCP. Se añadirán dos librerías de HTTP y un cliente MQTT. 
 \end{itemize}
@@ -172,7 +172,7 @@ Este proyecto se va a dividir en cuatro partes, que corresponden a las tres part
 
 Finalmente, se valorará el resultado del proyecto mediante unas conclusiones y se listarán una serie de posibles mejoras al proyecto actual. También hay un apéndice con información técnica acerca de cómo configurar los diferentes servicios.
 
-
+\newpage
 \chapter{Servicio en la nube}
 
 \section{Servicios en la nube actualmente}
@@ -348,7 +348,7 @@ Primero, se utiliza un \textbf{servidor WSGI en el puerto 8080} para que la apli
 
 Juntando la máquina de Google Compute Engine y las tecnologías para montar la API REST --WSGI y Flask--, se consigue hacer la puerta de entrada para poder interactuar con el simulador, el cual está encapsulado en un hilo de ejecución. Mediante la API REST se puede activar, pausar, detener o reanudar la ejecución del hilo de ejecución del simulador, así como consultar la glucosa actual en cada momento o enviar datos para simular. Pero lo que falta por convertir es la librería que hace el cálculo de las ecuaciones diferenciales.
 
-\section{MQTT}
+\section{Sistema MQTT}
 
 \subsection{Introducción a MQTT}
 
@@ -385,8 +385,72 @@ Dado que el broker Mosquitto se implementa en la máquina virtual, que lleva Ubu
 
 Los clientes MQTT están tanto en el código NAO como en la aplicación Java, y ambos tienen detallados su funcionamiento en sus secciones pertinentes. \\
 
-La intención para este sistema es sustituir la conexión TCP que enviaba mensajes periódicamente por una conexión asíncrona como es ésta, mucho más ligera a nivel computacional. Se envían mensajes para el arranque de hilos, órdenes directas al robot, mensajes de estado, entre otros.
+Los mensajes que se envían llevan una etiqueta, o tema, cuyo detalle de qué significa se encuentra en la tabla \ref{tabla:topicsmqtt}. \\
 
+La intención al haber empleado este sistema es sustituir la conexión TCP que enviaba mensajes periódicamente por una conexión asíncrona como es ésta. Podría haberse empleado también el sistema HTTP que hay montado para la simulación de diabetes y que los clientes si desean saber el estado de una variable, pueden consultarla periódicamente (mecanismo que se conoce como \textit{polling}, o muestreo de una variable), pero supone un problema de coste; se saturaría el sistema tras atender tantas peticiones periódicas y además la intención es aligerar computacionalmente el sistema, y ésta no es la manera. \\
+
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{|c|c|}
+	\hline 
+	\textbf{Topic (tema)} & \textbf{Descripción} \\ 
+	\hline 
+	hilos & Topic, o tema, que recoge información \\
+	& sobre el estado de los hilos que \\
+	& funcionan con MQTT, es decir, los hilos \\ 
+	& excluyentes. Esta información viene con \\ 
+	& un separador en un texto, que es del formato \\ 
+	& \textit{hilo,estado}, siendo hilo el nombre \\
+	& del hilo involucrado y estado una cadena \\ 
+	& de caracteres con los posibles valores: \\ 
+	& PARADO, CORRIENDO, PAUSADO. \\ 
+	\hline 
+	interfaz/\# & Es un tema padre, que son aquellos \\
+	& datos que deben ser visibles para el \\ 
+	& usuario mediante una interfaz. \\
+	\hline 
+	interfaz/ventanaescenario & Se recoge bajo este subtopic \\ 
+	& aquellos datos que deben mostrarse \\
+	& de manera auxiliar para que el usuario \\
+	& tenga más información del hilo excluyente \\
+	& Escenario, que es complejo. \\ 
+	\hline 
+	nao/\# & Siendo este tema un tema padre, se \\
+	& recoge bajo este tema toda aquella \\
+	& información que tenga que ver con la \\
+	& configuración de acciones sobre el robot \\
+	& NAO. \\ 
+	\hline 
+	nao/decir & Bajo este subtema o subtopic se envían \\
+	& órdenes de habla para que diga con voz \\
+	& la frase recogida bajo este tema. \\ 
+	\hline 
+	nao/mover & Bajo este subtema o subtopic se envían \\
+	& órdenes de acciones con movimiento. \\
+	& Estas pueden ser: Pincharse, Sentarse, \\
+	& Parada, Comer, MedirGlucosa, Correr. \\ 
+	\hline 
+	nao/leds & En este subtema se envían órdenes de \\
+	& encendido de leds según si se quiere \\
+	& encender o apagar la tonalidad de los \\
+	& leds de los ojos. Viene en formato \\
+	& \textit{color,onoff} y color puede ser verde, \\
+	& rojo o azul, y onoff simplemente \\
+	& on o off. \\ 
+	\hline 
+	nao/exacpalabra & En este subtema se reciben órdenes de \\
+	& establecimiento del mínimo de la exactitud \\
+	& de la palabra a la hora de reconocer voz. \\
+	& Es decir, qué mínima tiene que haber \\
+	& para dar una palabra por reconocida. \\ 
+	\hline 
+\end{tabular} 
+\caption{Temas utilizados en este proyecto y su significado.}
+\label{tabla:topicsmqtt}
+\end{center}
+\end{table}
+
+\newpage
 \section{Librería para el cálculo diferencial}
 
 Lo último necesario para terminar de migrar el simulador de diabetes a una aplicación web Python es adaptar la librería de cálculo diferencial. Tal como se menciona en la introducción de este proyecto, se sigue un modelo de simulación según Hovorka que emplea ecuaciones ODE (ecuaciones diferenciales ordinarias). En el simulador del anterior proyecto se emplea la librería Alglib, hecha para C++. Al convertir la aplicación a Python, es necesario cambiar también la librería de cálculo. \\
@@ -397,43 +461,210 @@ Por lo tanto se ha migrado la librería de cálculo a \textbf{SciPy} \cite{Scipy
 
 \chapter{Código en NAO}
 
-Idees de estructura:
-- Explicació del NAO i tipos de llenguatge
-- Explicació del projecte anterior i arquitectura (dibuixets de TCP)
-- Explicació de les limitacions de còmput de NAO i de limitacions de TCP
-- Estructura del meu projecte. MQTT entrar en detall del QoS. (Part Java, Part NAO i part GCloud).
-- Part Java: Mínim canvi realment. Explicar Paho i que es un client Rest.
-- Part NAO: Que he reconvertit el codi a Python perquè el NAO te molt mal el C++. 
-- Part GCloud: Aquí explayar-se.
-- Millores: Prescindir de GCloud i montarse una raspi amb un DNS, afegir més funcions al NAO, mes precisio del simulador aprofitant gcloud, manejar varios NAOs amb una sola app java i un sol gcloud...
+\section{Problemas con el código anterior}
+
+En el anterior proyecto, el código NAO incluía toda la lógica necesaria para que el robot estuviera en marcha. Como es el objetivo de este trabajo aligerar carga, se ha reducido la cantidad de clases que hay en el código anterior, cuyas relaciones se pueden ver en la figura \ref{figura:clasesnaoprevio}. Hay doce clases y están escritas en C++, cuya compilación es muy laboriosa, ya que emplea una serie de herramientas, algunas de NAOqi, que encorsetan demasiado el proyecto. NAOqi es el \textit{framework}, o conjunto de librerías y programas, en el que consiste el programa principal del robot y que lo controla. Estas herramientas que se emplean para la compilación son:
+\begin{itemize}
+	\item Compilación con Cmake, una herramienta que ayuda a la compilación de código en C++, para automatizar este proceso.
+	\item Qitoolchain es el conjunto de compilador cruzado, enlazador de librerías y otras funciones, necesarias para montar un ejecutable.
+	\item NaoqiSDK es el conjunto de clases, métodos y demás elementos para construir el código necesario para acceder a las funciones del robot.
+	\item Qibuild es la herramienta para construir un proyecto como NAO espera.
+\end{itemize}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=10cm]{img/clasesnaoprevio}
+	\caption{Clases de anterior proyecto en el código de NAO.}
+	\label{figura:clasesnaoprevio}
+\end{figure}
+
+Como puede verse en esta URL \cite{C++Desaconsejado} de la propia Aldebaran, la empresa propietaria de los robots NAO, se desaconseja el uso del lenguaje C++ si no se tiene un gran conocimiento de la compilación cruzada. Pero mayormente el problema reside en que no se puede añadir una librería de terceros de forma sencilla porque las herramientas de NAOqi restringen mucho su uso y resulta un proceso demasiado complejo.
+
+\section{Código actual}
+
+\subsection{Cambio a Python} \label{CambioPython}
+
+Para el código nuevo que se aloja en el robot NAO se ha decidido transformarlo en Python porque resulta mucho más sencillo montar un programa funcional que con C++ y es también mucho más fácil incluir librerías de terceros --a pesar de que tampoco es sencillo del todo en Python debido a unas limitaciones que tiene NAO que se verán más adelante. Se ha aprovechado el hecho de que el programa iba a sufrir una transformación muy grande de todos modos para modernizarlo un poco más. Además, Aldebaran aconseja su uso también en su web \cite{ProgrammingLanguages}, justificando que Python es más compatible (en la imagen \ref{figura:comparativalenguajes} se ve la comparativa) con otras aplicaciones suyas como \textit{Choreographe}, que en este proyecto no se utiliza pero si es necesario hacerlo en futuras ocasiones será de provecho.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=6cm]{img/supported_language}
+	\caption{Tabla comparativa de lenguajes de programación en NAO.}
+	\label{figura:comparativalenguajes}
+\end{figure}
+
+La versión de Python que dispone NAO es únicamente la versión \textbf{Python 2.7}. Esta es la versión con la que se permite conectar a los llamados \textit{proxies}, que no son más que las llamadas a los componentes \textit{hardware} como los motores o las cámaras para que ejecuten sus funciones. 
+
+\newpage
+\subsection{Clases del código en NAO}
+
+Se ha conseguido reducir el número de clases de doce a siete, ya que sin el hilo del simulador ni el hilo TCP se perdía mucho grueso de la ejecución y por lo tanto puede reducirse más de lo esperado. Si antes el diagrama de clases era como en la figura \ref{figura:clasesnaoprevio}, en este proyecto el diagrama de clases es como en la figura \ref{figura:naoprogramaactual}.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=8cm]{img/clasesnaonuevo}
+	\caption{Diagrama de clases del código de NAO actualmente.}
+	\label{figura:naoprogramaactual}
+\end{figure}
+
+Las clases nuevas implementadas son \textbf{DispatchMQTT} y \textbf{SimuladorRemoto}, las cuales llevan los clientes de MQTT y HTTP para conectar con el simulador remoto y el \textit{broker} MQTT. Pero el resto de clases se merecen una observación porque la mayoría ha sufrido un cambio considerable:
+\begin{itemize}
+	\item \textbf{DatosCompartidos}: Se ha reducido la cantidad de datos compartidos, ya que al cambiar las comunicaciones, la mayor parte ya no se utiliza. Además, se ha añadido la gestión de los hilos excluyentes a esta clase, para que gestione cuál de los dos hilos está en activo: si Escenario o Interacción.
+	\item \textbf{AccionesNAO}: Se ha mantenido la lógica de esta clase prácticamente igual que en C++, pero pasada a Python. Se comunica directamente con los \textit{proxies} de NAOqi para hacer movimientos, escuchar palabras y decir palabras, entre otras funciones.
+	\item \textbf{DispatchMQTT}: Es una clase nueva que emplea la librería externa \textit{Paho MQTT} que contiene el cliente MQTT mediante el cual está a la espera de nuevos mensajes que le pueden llegar desde el \textit{broker}, en el Google Compute Engine. Cuando reciba un mensaje, ejecutará una \textit{callback}, de forma que así se ahorra un hilo al ejecutar tareas asíncronamente. De igual forma puede publicar mensajes al \textit{broker} para que los reciba otro cliente suscrito a un tema. Estos casos pueden ocurrir en cuanto la interfaz Java ordene al hilo Escenario o Interacción detenerse, arrancar o pausarse. También puede ocurrir que si ningún hilo excluyente está activo, puede ordenar acciones simples como decir una frase, hacer un movimiento simple, etcétera.
+	\item \textbf{SimuladorRemoto}: Contiene el cliente HTTP que envía peticiones al servidor REST que está montado en el Google Compute Engine. Contiene las llamadas para ejecutar los métodos de las tablas \ref{tabla:urishttpget} y \ref{tabla:urishttpput}, que arranca, para o pausa el simulador de diabetes y además puede consultar la glucosa y publicar datos de simulación. Estos métodos se utilizan combinados con el objeto Escenario, cuando se le ordena comer o hacer ejercicio, por ejemplo. Para ello se ha empleado la librería \textit{requests}, una librería propia de Python.
+	\item \textbf{Interacción}: Es uno de los dos hilos excluyentes. La lógica de esta clase se ha alterado mínimamente, pues es una clase en la que simplemente se reciben órdenes verbales y se responde con una acción.
+	\item \textbf{Escenario}: El otro de los dos hilos excluyentes. Es similar a Interacción, pero es más complejo. Consta de dos fases. La fase 2, tiene pocas órdenes verbales que atiende, pero aún así tiene en cuenta la glucosa que tiene en dicho instante y toma medidas correctoras si fuera necesario. Por ejemplo, si hay una situación de glucosa muy alta, se pincha insulina de urgencia. La fase 3 es como la fase 2 pero más compleja, pues tiene estados dentro de la fase, muchas más órdenes posibles, comportamientos correctos e incorrectos, entre otras cosas.
+	\item \textbf{MainNAO}: La clase principal. Se ha cambiado la lógica porque principalmente, se ha modificado toda la arquitectura de clases y hay que construirlo de otro modo todo, y en segundo lugar, porque no es la misma inicialización de clases para Python que para C++. En Python es mucho más sencillo.
+\end{itemize}
+
+Las clases que han desaparecido han sido la interfaz \textit{Runnable}, pues solamente la implementarían dos clases, y dos métodos de una línea cada clase, así que se ha implementado directamente -- además que en C++ era necesario implementar una interfaz que unificara los tipos de los objetos y en Python esto no es necesario, al ser un lenguaje no tipado. También ha desaparecido \textit{TCPServer}, \textit{TCPReceiver} y \textit{TCPSender}, porque se han sustituido por las clases cliente de HTTP y MQTT. Se ha eliminado \textit{Simulador} porque como se ha mencionado repetidamente, se ha convertido en un servicio web. La clase \textit{ThreadManager} se ha integrado con DatosCompartidos, porque al eliminar los hilos que atienden las conexiones TCP y el Simulador, quedan solamente dos hilos excluyentes que gestionar, y de paso también \textit{Dispatcher} porque era una clase que unificaba las clases TCP para lanzar hilos excluyentes y no excluyentes. \\
+
+En el capítulo 5 se explica bien el funcionamiento de esta parte del proyecto interrelacionada con las demás partes, porque por si sola carece de significado. Necesita que las demás clases la activen.
 
 \chapter{Aplicación Java}
 
-????? ????????????? ????????????? ????????????? ????????????? ?????????????
+El cliente Java ha sufrido un cambio mínimo. Lo más destacable es la sustitución de la clase TCP por los mecanismos de comunicación nuevos, MQTT y HTTP. Para MQTT, se ha empleado \textbf{Paho MQTT}, el cliente creado por Eclipse y para HTTP se utilizado la librería propia de Java \textbf{java.net}. El diagrama de clases queda como en la imagen  \ref{figura:clasesjava}, y las nuevas clases incluidas son \textit{ConectaGCloud} y \textit{ConectaMQTT}.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=9cm]{img/ClasesJava}
+	\caption{Diagrama de clases del cliente Java.}
+	\label{figura:clasesjava}
+\end{figure}
+
+A diferencia de la sección del código en NAO, en la que se explicaba cada clase cómo se había transformado, en esta parte no va a desglosarse el funcionamiento, pues la lógica del programa es prácticamente la misma a excepción de las dos clases nuevas que se han añadido.
+
+\section{MQTT en la aplicación Java}
+
+Se aloja en la clase ConectaMQTT. Emplea para ello el cliente de Paho MQTT, una librería de terceros, como se ha mencionado antes, y las funciones que realiza son, como en el código NAO, dos:
+\begin{itemize}
+	\item \textbf{Publicar mensajes}: Está configurado para publicar al \textit{broker} MQTT mensajes tanto de estado de hilos (apagado, encendido o pausado), como también puede ejecutar órdenes simples que van directas a la clase \textit{AccionesNAO}, en caso de que no haya ningún hiloExcluyente corriendo, para que se mueva, hable, encienda unos leds, entre otros.
+	\item \textbf{Suscribirse a mensajes}: Está suscrito a los mensajes del estado de los hilos, para recibir si se ha apagado algún hilo, y al estado del hilo Escenario para en el caso de que esté activo el hilo mencionado, transmita el estado en el que se encuentra. Al final esto es para obtener más trazabilidad, pues el hilo de Escenario es bastante complejo.
+\end{itemize}
+
+\section{HTTP en la aplicación Java}
+
+Las conexiones HTTP están implementadas en la clase \textit{ConectaGCloud}. Se realizan peticiones HTTP a las URLs especificadas en las tablas \ref{tabla:urishttpget} y \ref{tabla:urishttpput} mediante el paquete propio de Java, \textit{java.net}, como se ha mencionado previamente.\\
+
+Hay dos peticiones que se ejecutan cada segundo de forma \textbf{periódica}. La primera es para consultar el nivel de glucosa que actualmente marca el simulador de diabetes y ubicar el dato en la gráfica del nivel de glucosa. La segunda es para consultar el estado del hilo del simulador, es decir, para consultar si se encuentra apagado, pausado o en activo. Así lo marcará en un color en la interfaz, en el apartado de los hilos. \\
+
+Las otras llamadas, las que no son periódicas, sino \textbf{esporádicas}, responden a esta serie de acciones:
+\begin{itemize}
+	\item Verificar que el servicio web del simulador está en marca mediante una consulta a la URL padre. Si responde correctamente, dejará arrancar la aplicación Java, y sino, lanzará un mensaje de error.
+	\item Operaciones sobre la URL de /Hilo/ para detener, pausar o activar el hilo que simula los niveles de glucosa.
+	\item Envío de parámetros de simulación nuevos. Esto en la interfaz se muestra de manera que hay dos órdenes predefinidas, una de comer, para que aumente la glucosa, y otra orden de deporte, para que baje. Pero también existe la posibilidad de enviar una orden personalizada con el nivel de insulina inyectada, la cantidad de comida ingerida y deporte si es que lo hay.
+	\item Establecimiento del modo de simulación, siendo el modo de simulación la lentitud o rapidez con la que se simula el comportamiento del páncreas.
+\end{itemize}
 
 \chapter{Relación entre los componentes}
 
-????? ????????????? ????????????? ????????????? ????????????? ????????????? 
+\section{Jerarquía de los componentes}
 
-\section{?? ???? ???? ? ?? ??}
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=9cm]{img/Conexion}
+	\caption{Partes del proyecto conectadas.}
+	\label{figura:conexionpartes}
+\end{figure}
 
-????? ????????????? ????????????? ????????????? ????????????? ?????????????
+Las partes de este proyecto tienen dos niveles de jerarquía. El primero, el \textbf{servidor}, es el ocupado por la parte en Google Compute Engine, la máquina virtual. En ella se aloja tanto el \textit{broker} MQTT como el servidor WSGI que contiene el servidor REST. Atiende peticiones en el puerto 1883 para MQTT y en el puerto 8080 para las peticiones REST. Tiene una capacidad de cómputo alta, y es escalable en caso de que el número de peticiones creciera, pero no es el caso porque el proyecto por el momento no puede tener más clientes. Su dirección IP debe ser fija, que lo es, para que aunque el robot y la aplicación cambien de red y por lo tanto se les asigne otra IP, puedan saber en todo momento donde deben referirse para obtener los servicios deseados.\\
+
+La otra es la parte \textbf{cliente}, que la constituyen la aplicación Java y el robot NAO. La \textbf{aplicación Java} básicamente se encarga de enseñar al usuario el estado del robot, así como un panel de control para manejar el estado del simulador y lanzar órdenes al robot. El \textbf{robot NAO} es el receptor de las órdenes que lanza la interfaz Java, y a la vez consulta el estado del simulador para actuar en consecuencia durante la ejecución de los hilos. \\
+
+En la imagen \ref{figura:conexionpartes} se aprecia la relación explicada en los párrafos anteriores.
+
+\section{Traza de ejecución}
+
+En esta sección se cuenta cuál es el flujo de llamadas al servicio web y \textit{broker} por el que pasan las aplicaciones, y cual es la respuesta que generan, de forma que se lleva a cabo una ejecución correcta. \\
+
+Suponiendo que la máquina virtual está activa y los servicios que contienen MQTT y REST se han levantado correctamente, primero \textbf{se arranca la aplicación Java}. Se muestra en ella la IP de la máquina virtual de Google Compute Engine por defecto, que como es estática, será la que hay escrita por defecto porque n va a cambiar, como se aprecia en la imagen \ref{figura:mainwindow}. Al pulsar el botón \textit{Conectar}, se hace una llamada \textbf{GET HTTP a http://34.76.240.69:8080/}, y si es exitosa, es decir, que el código de respuesta es \textbf{200 OK}, se procederá a los siguientes pasos en la aplicación. En caso de que no lo sea, se lanza un mensaje de error mediante un diálogo indicando que el Google Compute Engine no está disponible.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=4cm]{img/mainwindow}
+	\caption{Ventana de arranque de la aplicación Java.}
+	\label{figura:mainwindow}
+\end{figure}
+
+En este momento, si la llamada ha resultado correcta, se ejecutan una serie de pasos nuevos:
+\begin{itemize}
+	\item Se crea el cliente MQTT y se asocia a los topics que quiere suscribirse, que son \textbf{hilos} e \textbf{interfaz/ventanaescenario}.
+	\item Se crea \textit{Manager}, que es una clase que ejecuta un hilo en el cual se consulta periódicamente al simulador vía HTTP cuál es su glucosa actual (\textbf{GET HTTP http://34.76.240.69:8080/Simulador/Glucosa/}), que devolverá un número decimal, y cuál es el estado actual del hilo del simulador (\textbf{GET HTTP http://34.76.240.69:8080/Hilo/}), que devolverá \textit{CORRIENDO}, \textit{PARADO} o \textit{PAUSADO}.
+	\item Se crea \textit{VentanaControl}. En la ventana de control, como se aprecia en la figura \ref{figura:ventanacontrol1}, aparece una interfaz en la cual pueden ejecutarse una serie de órdenes hacia el robot -- pero que como todavía no está en marcha, aunque se envíen no se recibirán y se van a perder. Lo más relevante de esta vista es el panel de la derecha, que aparece SIMULADOR en rojo que significa que se encuentra detenido.Esto lo provoca la respuesta del simulador desde la llamada GET al estado del hilo.
+	\item Se crea \textit{VentanaSimulacion}, como se ve en la figura \ref{figura:ventanavisualizacion1}. En esta gráfica se pintan los resultados de la llamada GET a la URL de glucosa del simulador. En el caso de recibir -1000, se indica que el simulador está detenido, como es el caso de la figura, y si se recibe -999, significa que el simulador está pausado. En caso distinto, se pintaría la gráfica con el histórico de valores de glucosa obtenidos del simulador de diabetes.
+\end{itemize}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=6cm]{img/ventanacontrol1}
+	\caption{Ventana de control al iniciar la aplicación Java.}
+	\label{figura:ventanacontrol1}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=6cm]{img/ventanavisualizacion1}
+	\caption{Ventana de visualización del nivel de glucosa al iniciar la aplicación Java.}
+	\label{figura:ventanavisualizacion1}
+\end{figure}
+
+El siguiente paso es \textbf{encender el robot}, que ejecuta el programa en Python. Lo primero que hace es suscribirse en el \textit{broker} MQTT a todos los subtemas que hay debajo de nao/, mediante la nomenclatura \textbf{nao/\#}, y a \textbf{hilos}. Crea las clases con hilos excluyentes -- Escenario e Interaccion -- con los hilos en reposo, y  \textbf{publica en <<INTERACCION,PARADO>> y <<ESCENARIO,PARADO>> en el tema <<hilos>>}. Cuando termina de publicar a MQTT, arranca el simulador mediante la orden \textbf{PUT HTTP http://34.76.240.69:8080/Hilo/, con el parámetro <<CORRIENDO>>}. De este modo, en la ventana de control se refleja con el color verde sobre simulador señalizando que el hilo ya se encuentra en marcha, y en la ventana de visualización ya se empieza a ver el progreso de la simulación de la glucosa. Además, al estar la aplicación Java suscrita a \textit{hilos}, recibe el mensaje de los hilos, y los añade a la lista de hilos en color rojo porque están parados. Se aprecia lo descrito en las imágenes \ref{figura:ventanacontrol2} y \ref{figura:ventanavisualizacion2}.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=6cm]{img/ventanacontrol2}
+	\caption{Ventana de control en Java al haber iniciado el código de NAO.}
+	\label{figura:ventanacontrol2}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=6cm]{img/ventanavisualizacion2}
+	\caption{Ventana de visualización en Java del nivel de glucosa al haber arrancado el simulador desde NAO.}
+	\label{figura:ventanavisualizacion2}
+\end{figure}
+
+Con los hilos excluyentes apagados pueden ejecutarse órdenes simples como decir una frase escribiéndola en el cuadro de texto de debajo de la ventada de control, que publicaría el mensaje con la frase a pronunciar bajo el topic MQTT \textbf{nao/decir}, enviar acciones con el menú desplegable de la izquierda de ventana de control, que publica la acción en MQTT con el tema \textbf{nao/mover}, y así. En cambio, si se desea enviar una simulación de acción mediante la interfaz, en la opción del menú superior \textit{Simulación}, se enviará un \textbf{PUT HTTP http://34.76.240.69:8080/Simulador/DatosSimulacion/} con los datos en JSON de si hay bolo de comida, si se ha inyectado insulina y de si se ha hecho deporte. \\
+
+Cuando se decide arrancar un hilo excluyente, se hace seleccionando un hilo de la ventana de control y mediante menú contextual, se selecciona \textit{Arrancar}. Esto genera una publicación <<ESCENARIO,CORRIENDO>> -- por ejemplo -- al tema \textbf{hilos de MQTT} que el robot NAO recibe mediante suscripción, y activa el hilo de lo seleccionado. \\
+
+Supóngase que se ha activado el hilo Escenario, que es similar a Interacción pero con más actividad. Este hilo tiene un bucle infinito que solamente se detiene si desde la interfaz Java se selecciona el hilo y se pulsa mediante menú contextual la opción "Parar", que publica <<ESCENARIO,PARADO>> al tema \textbf{hilos de MQTT}. Pero durante su ejecución, el hilo primero consulta el nivel de glucosa mediante \textbf{GET HTTP http://34.76.240.69:8080/Simulador/Glucosa/}, y actúa en consecuencia. Si la glucosa tiene niveles extremos y se debe tomar medidas de urgencia, puede enviar él solo parámetros de simulación, para tomar comida urgentemente o pincharse insulina. Estas órdenes de simulación se envían de forma JSON en \textbf{PUT HTTP http://34.76.240.69:8080/Simulador/DatosSimulacion/}. En cambio si la glucosa tiene niveles dentro de un rango asumible, se gestiona según las órdenes que recibe de la persona que habla al robot. Paralelamente, este hilo concretamente publica a cada iteración el estado de las variables de control bajo el \textbf{topic MQTT interfaz/ventanaescenario}, de manera que la interfaz Java lo recoge porque está suscrito al tema y lo muestra en \textit{VentanaEscenario}, una ventana nueva, como en la figura \ref{figura:ventanaescenario} se muestra.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[height=6cm]{img/ventanaescenario}
+	\caption{Ventana de escenario, para visualizar las variables de control durante la ejecución del hilo excluyente Escenario.}
+	\label{figura:ventanaescenario}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                 CONCLUSIONS                                 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Conclusions}
+\chapter{Conclusiones}
 
-\section{Mejoras} 
+\section{Posibles mejoras} 
 
-Poder arrancar la MV desde API \\
-Hacer la app Java una app web en el GCE \\
-Controlar mas de un robot con su simulador asignado a la vez
+Para futuras líneas de evolución de este proyecto, se pueden incorporar ciertas mejoras que pueden hacer de la aplicación entera un ente más flexible. \\
+
+Principalmente, se asume que hoy en día la máquina virtual sobre Google Compute Engine está siempre activa. Pero a nivel de coste económico esto es bastante malo, pues los cobros en la aplicación se hacen por tiempo de uso, no por intensidad de uso. Por lo tanto, Google Compute Engine dispone de una API mediante la cual se puede activar y detener las máquinas virtuales que se deseen, así como crear nuevas o borrarlas también. Para ello es muy necesario tener buenas medidas de seguridad, pues al final las máquinas virtuales son unidades de cómputo, muy cotizadas, y cualquier desliz puede derivar en un ataque. \\
+
+Otra mejora que facilitaría muchísimo todo el proceso es suprimir la aplicación Java en favor de una aplicación web que haga las mismas funciones pero accediendo desde el navegador. Así, se ahorra el tener que disponer del ejecutable y se convierte en una aplicación muy portable. Gracias a Google App Engine, esto es una posibilidad muy factible, pues facilita mucho las cosas para poder tener páginas web estáticas que se comunica con otros productos de Google Cloud. \\
+
+Para solucionar la pérdida de mensajes MQTT porque un elemento se encuentra apagado y no los recibe, se puede subir el nivel de QoS, o \textit{Quality of Service}. Existen tres niveles posibles, siendo 0 el más bajo y 2 el más alto. Por defecto se encuentra a 0, que es así como se encuentra en este proyecto, y sigue la política \textit{fire and forget}, o lo que es lo mismo, envía y olvida. En el nivel 1 de QoS, cuando se recibe un mensaje, se espera un ACK, o mensaje de reconocimiento que acredita que se ha recibido el mensaje. Finalmente en el nivel 2 de QoS, se publica un mensaje, lo recibe el suscriptor, se envía un acuse de recibo que recibe el publicador, el publicador responde con que ha recibido el acuse de recibo y el suscriptor envía otro acuse de recibo. Así está explicado según HiveMQ \cite{QoS}, pero que aplica a MQTT en general. \\
+
+Para hacer la aplicación más extensa a más robots se puede implementar en el simulador que haya más de un hilo, de forma que haya más de un simulador de diabetes para más de un robot conectado al sistema. Mediante identificaciones de ID y una buena gestión de los datos de cada uno, es asumible que puede realizarse esta mejora. \\
+
+Finalmente si se decide prescindir de componentes de terceros como son las aplicaciones de Google, que al final suponen un coste económico, se puede adquirir un sistema empotrado, alquilar un dominio y montar allí mismo el servicio. Si bien es cierto que por ahora la aplicación tiene un coste conocido, si se decide abrir a más componentes como es más robots y más simuladores, el coste computacional sería desconocido. Entonces se perdería el beneficio de tener máquinas virtuales escalables en función de la demanda como lo hace Google Compute Engine y habría que implementarlo en el sistema empotrado mediante otra herramienta.
 
 \section{Conclusiones}
 
-?????????????????????????????????????
+El estado del arte en los desarrollos tiende a derivar los procesos de cómputo pesados a máquinas externas con grandes capacidades para conseguir tiempos de ejecución cada vez más competitivos. Mediante técnicas como la llevada a cabo en este proyecto es como se logra conseguir un mejor rendimiento. \\
+
+La tecnología HTTP y la arquitectura REST, hoy en día cuasi predominantes, junto con mecanismos de comunicación asíncrona como es MQTT han permitido que este proyecto se lleve a cabo y se pueda optimizar muchísimo el código que había antes, reduciendo la cantidad de hilos y las operaciones complejas. \\
+
+Además de los objetivos principales, que básicamente han sido reducir la carga computacional del proyecto, se ha querido optimizar el código y su implementación, es decir, corregir pequeños fallos y modernizar de acuerdo a los estándares actuales aspectos de compilación de código.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                BIBLIOGRAFIA                                 %
@@ -452,7 +683,7 @@ Controlar mas de un robot con su simulador asignado a la vez
 \bibitem{NAOdatasheet}
 	Características técnicas del Robot NAO. \\
 	\newblock Consultado en: \\
-   	\url{https://static1.squarespace.com/static/52e733d8e4b062fc0c603ea8/t/53a13620e4b0d80b1acadb20/1403074080427/nao_datasheet.pdf}
+   	\url{https://static1.squarespace.com/static/52e733d8e4b062fc0c603ea8/t/53a13620e4b0d80b1acadb20/1403074080427/nao_datashee3555555555t.pdf}
 
 \bibitem{TFMAnterior}
 	Desarrollo de un sistema de monitorización y control de un robot simulador de diabetes. Autor: Antonio Bengochea Carrasco. \\
@@ -514,6 +745,21 @@ Controlar mas de un robot con su simulador asignado a la vez
 	\newblock Consultado en: \\
 	\url{https://www.scipy.org/}
 	
+\bibitem{C++Desaconsejado}
+	Advertencia del uso de C++ para programar NAO\\
+	\newblock Consultado en: \\
+	\url{http://doc.aldebaran.com/2-1/getting_started/index.html}
+	
+\bibitem{ProgrammingLanguages}	
+	Los lenguajes de programación posibles para NAO\\
+	\newblock Consultado en: \\
+	\url{http://doc.aldebaran.com/2-1/dev/programming_index.html}
+	
+\bibitem{QoS}
+	Niveles de QoS, o Quality of Service en MQTT\\
+	\newblock Consultado en: \\
+	\url{https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels/}
+	
 
 \end{thebibliography}
 \cleardoublepage
@@ -528,26 +774,21 @@ Controlar mas de un robot con su simulador asignado a la vez
 %                         LA CONFIGURACIO DEL SISTEMA                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Configuració del sistema}
+%\chapter{Configuració del sistema}
 
-????? ????????????? ????????????? ????????????? ????????????? ?????????????
+%????? ????????????? ????????????? ????????????? ????????????? ?????????????
 
-\section{Fase d'inicialització}
+%\section{Fase d'inicialització}
 
-????? ????????????? ????????????? ????????????? ????????????? ?????????????
+%????? ????????????? ????????????? ????????????? ????????????? ?????????????
 
-\section{Identificació de dispositius}
+%\section{Identificació de dispositius}
 
-????? ????????????? ????????????? ????????????? ????????????? ?????????????
+%????? ????????????? ????????????? ????????????? ????????????? ?????????????
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                               ALTRES  APÈNDIXS                              %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\chapter{??? ???????????? ????}
-
-????? ????????????? ????????????? ????????????? ????????????? ????????????? 
 
 
 

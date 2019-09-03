@@ -59,7 +59,7 @@ public class MainWindow {
 		frmClienteNao = new JFrame();
 		ImageIcon img = new ImageIcon("icono.jpg");
 		frmClienteNao.setIconImage(img.getImage());
-		frmClienteNao.setTitle("Cliente GCloud");
+		frmClienteNao.setTitle("Cliente Java");
 		frmClienteNao.setResizable(false);
 		frmClienteNao.setBounds(100, 100, 399, 140);
 		frmClienteNao.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

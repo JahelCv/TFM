@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7140 64-bit) (preloaded format=pdflatex 2019.8.20)  27 AUG 2019 19:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7140 64-bit) (preloaded format=pdflatex 2019.8.20)  31 AUG 2019 21:08
 entering extended mode
 **./plantillatfg.tex
 (plantillatfg.tex
@@ -549,17 +549,17 @@ LaTeX Info: Redefining \nameref on input line 66.
 \@outlinefile=\write3
 \openout3 = `plantillatfg.out'.
 
-<ai2_original.png, id=127, 112.92188pt x 112.92188pt>
+<ai2_original.png, id=139, 112.92188pt x 112.92188pt>
 File: ai2_original.png Graphic file (type png)
 <use ai2_original.png>
 Package pdftex.def Info: ai2_original.png  used on input line 66.
 (pdftex.def)             Requested size: 56.90706pt x 56.9055pt.
-<disca.png, id=129, 136.51pt x 55.20625pt>
+<disca.png, id=141, 136.51pt x 55.20625pt>
 File: disca.png Graphic file (type png)
 <use disca.png>
 Package pdftex.def Info: disca.png  used on input line 66.
 (pdftex.def)             Requested size: 140.71935pt x 56.9055pt.
-<isa.png, id=130, 46.67438pt x 38.39343pt>
+<isa.png, id=142, 46.67438pt x 38.39343pt>
 File: isa.png Graphic file (type png)
 <use isa.png>
 Package pdftex.def Info: isa.png  used on input line 66.
@@ -599,12 +599,12 @@ LaTeX Font Info:    Try loading font information for OT1+zplm on input line 66.
 ("C:\Program Files\MiKTeX 2.9\tex/latex/psnfss\ot1zplm.fd"
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
 )
-<logo-upv.pdf, id=131, 331.2375pt x 105.39375pt>
+<logo-upv.pdf, id=143, 331.2375pt x 105.39375pt>
 File: logo-upv.pdf Graphic file (type pdf)
 <use logo-upv.pdf>
 Package pdftex.def Info: logo-upv.pdf  used on input line 66.
 (pdftex.def)             Requested size: 178.85042pt x 56.9055pt.
-<baseportada.png, id=132, 1027.84pt x 578.16pt>
+<baseportada.png, id=144, 1027.84pt x 578.16pt>
 File: baseportada.png Graphic file (type png)
 <use baseportada.png>
 Package pdftex.def Info: baseportada.png  used on input line 66.
@@ -665,6 +665,12 @@ LaTeX Info: Redefining \. on input line 5.
 LaTeX Info: Redefining \% on input line 5.
 LaTeX Info: Redefining \. on input line 7.
 LaTeX Info: Redefining \% on input line 7.
+
+Overfull \hbox (3.58432pt too wide) in paragraph at lines 29--29
+ [][] [][][]\T1/ppl/m/n/12 Ventana de vi-sua-li-za-ción en Ja-va del ni-vel de 
+glu-co-sa al ha-ber arran- 
+ []
+
 )
 \tf@lof=\write5
 \openout5 = `plantillatfg.lof'.
@@ -698,7 +704,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 94--95
 
  []
 
-<img/NAOIlustracion.jpg, id=234, 935.43845pt x 526.24774pt>
+<img/NAOIlustracion.jpg, id=276, 935.43845pt x 526.24774pt>
 File: img/NAOIlustracion.jpg Graphic file (type jpg)
 <use img/NAOIlustracion.jpg>
 Package pdftex.def Info: img/NAOIlustracion.jpg  used on input line 98.
@@ -710,7 +716,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 103--104
 
  []
 
-<img/NAOCinematico.png, id=237, 853.1875pt x 1473.505pt>
+<img/NAOCinematico.png, id=279, 853.1875pt x 1473.505pt>
 File: img/NAOCinematico.png Graphic file (type png)
 <use img/NAOCinematico.png>
 Package pdftex.def Info: img/NAOCinematico.png  used on input line 107.
@@ -730,7 +736,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 140--141
 LaTeX Info: Redefining \. on input line 141.
 LaTeX Info: Redefining \% on input line 141.
 [2 <./img/NAOCinematico.png>]
-<img/IntelAtom.jpg, id=254, 863.47594pt x 453.94594pt>
+<img/IntelAtom.jpg, id=296, 863.47594pt x 453.94594pt>
 File: img/IntelAtom.jpg Graphic file (type jpg)
 <use img/IntelAtom.jpg>
 Package pdftex.def Info: img/IntelAtom.jpg  used on input line 144.
@@ -752,8 +758,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 171--172
 
  []
 
-LaTeX Info: Redefining \. on input line 176.
-LaTeX Info: Redefining \% on input line 176.
+LaTeX Info: Redefining \. on input line 175.
+LaTeX Info: Redefining \% on input line 175.
 [4]
 Cap\'{\i }tulo 2.
 
@@ -766,7 +772,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 182--183
 
  []
 
-<img/cloudcompute.png, id=264, 66.07542pt x 68.96623pt>
+<img/cloudcompute.png, id=307, 66.07542pt x 68.96623pt>
 File: img/cloudcompute.png Graphic file (type png)
 <use img/cloudcompute.png>
 Package pdftex.def Info: img/cloudcompute.png  used on input line 186.
@@ -774,7 +780,7 @@ Package pdftex.def Info: img/cloudcompute.png  used on input line 186.
 [5
 
  <./img/cloudcompute.png>]
-<img/iaas_saas_paas.png, id=270, 770.88pt x 717.43031pt>
+<img/iaas_saas_paas.png, id=313, 770.88pt x 717.43031pt>
 File: img/iaas_saas_paas.png Graphic file (type png)
 <use img/iaas_saas_paas.png>
 Package pdftex.def Info: img/iaas_saas_paas.png  used on input line 201.
@@ -796,7 +802,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 212--213
 
  []
 
-<img/googlecloudproducts.png, id=280, 2296.58pt x 1369.115pt>
+<img/googlecloudproducts.png, id=323, 2296.58pt x 1369.115pt>
 File: img/googlecloudproducts.png Graphic file (type png)
 <use img/googlecloudproducts.png>
 Package pdftex.def Info: img/googlecloudproducts.png  used on input line 216.
@@ -874,7 +880,7 @@ LaTeX Font Info:    Font shape `T1/ppl/bx/it' in size <12> not available
 LaTeX Info: Redefining \. on input line 360.
 LaTeX Info: Redefining \% on input line 360.
 [11]
-<img/mqttexplanation.png, id=320, 1203.7472pt x 679.78969pt>
+<img/mqttexplanation.png, id=363, 1203.7472pt x 679.78969pt>
 File: img/mqttexplanation.png Graphic file (type png)
 <use img/mqttexplanation.png>
 Package pdftex.def Info: img/mqttexplanation.png  used on input line 373.
@@ -902,99 +908,305 @@ Underfull \hbox (badness 10000) in paragraph at lines 386--387
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 392--393
+Underfull \hbox (badness 10000) in paragraph at lines 388--389
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 394--395
+Underfull \hbox (badness 10000) in paragraph at lines 390--391
 
  []
 
 
-Underfull \vbox (badness 2293) has occurred while \output is active []
+LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-LaTeX Info: Redefining \. on input line 397.
-LaTeX Info: Redefining \% on input line 397.
- [13]
-LaTeX Info: Redefining \. on input line 398.
-LaTeX Info: Redefining \% on input line 398.
+LaTeX Info: Redefining \. on input line 453.
+LaTeX Info: Redefining \% on input line 453.
+[13]
+Underfull \hbox (badness 10000) in paragraph at lines 456--457
 
-[14]
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+LaTeX Info: Redefining \. on input line 457.
+LaTeX Info: Redefining \% on input line 457.
+ [14]
+Underfull \hbox (badness 10000) in paragraph at lines 458--459
+
+ []
+
+LaTeX Info: Redefining \. on input line 462.
+LaTeX Info: Redefining \% on input line 462.
+[15] [16
+
+]
 Cap\'{\i }tulo 3.
-[15
+<img/clasesnaoprevio.png, id=394, 828.696pt x 564.30824pt>
+File: img/clasesnaoprevio.png Graphic file (type png)
+<use img/clasesnaoprevio.png>
+Package pdftex.def Info: img/clasesnaoprevio.png  used on input line 476.
+(pdftex.def)             Requested size: 417.84961pt x 284.52756pt.
 
-] [16
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Underfull \vbox (badness 7832) has occurred while \output is active []
+
+ [17]
+<img/supported_language.png, id=404, 338.01282pt x 155.83218pt>
+File: img/supported_language.png Graphic file (type png)
+<use img/supported_language.png>
+Package pdftex.def Info: img/supported_language.png  used on input line 491.
+(pdftex.def)             Requested size: 370.30403pt x 170.71652pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+LaTeX Info: Redefining \. on input line 498.
+LaTeX Info: Redefining \% on input line 498.
+[18 <./img/clasesnaoprevio.png>]
+<img/clasesnaonuevo.png, id=413, 481.8pt x 390.45876pt>
+File: img/clasesnaonuevo.png Graphic file (type png)
+<use img/clasesnaonuevo.png>
+Package pdftex.def Info: img/clasesnaonuevo.png  used on input line 505.
+(pdftex.def)             Requested size: 280.8704pt x 227.62204pt.
+LaTeX Info: Redefining \. on input line 514.
+LaTeX Info: Redefining \% on input line 514.
+ [19 <./img/supported_language.png> <./img/clasesnaonuevo.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 521--522
+
+ []
+
+LaTeX Info: Redefining \. on input line 522.
+LaTeX Info: Redefining \% on input line 522.
+[20]
+LaTeX Info: Redefining \. on input line 525.
+LaTeX Info: Redefining \% on input line 525.
+ [21] [22
 
 ]
 Cap\'{\i }tulo 4.
-[17] [18
+<img/ClasesJava.png, id=435, 753.81625pt x 426.59375pt>
+File: img/ClasesJava.png Graphic file (type png)
+<use img/ClasesJava.png>
+Package pdftex.def Info: img/ClasesJava.png  used on input line 531.
+(pdftex.def)             Requested size: 452.5233pt x 256.0748pt.
+
+Overfull \hbox (25.73195pt too wide) in paragraph at lines 531--532
+ [][] 
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [23 <./img/ClasesJava.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 548--549
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 550--551
+
+ []
+
+LaTeX Info: Redefining \. on input line 560.
+LaTeX Info: Redefining \% on input line 560.
+[24]
+LaTeX Info: Redefining \. on input line 560.
+LaTeX Info: Redefining \% on input line 560.
+ [25] [26
 
 ]
 Cap\'{\i }tulo 5.
-[19] [20
+<img/Conexion.png, id=456, 576.1525pt x 376.40625pt>
+File: img/Conexion.png Graphic file (type png)
+<use img/Conexion.png>
+Package pdftex.def Info: img/Conexion.png  used on input line 566.
+(pdftex.def)             Requested size: 391.9895pt x 256.0748pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 571--572
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 573--574
+
+ []
+
+
+Underfull \vbox (badness 1112) has occurred while \output is active []
+
+ [27 <./img/Conexion.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 579--580
+
+ []
+
+<img/mainwindow.png, id=464, 239.09325pt x 84.91725pt>
+File: img/mainwindow.png Graphic file (type png)
+<use img/mainwindow.png>
+Package pdftex.def Info: img/mainwindow.png  used on input line 585.
+(pdftex.def)             Requested size: 320.45624pt x 113.81102pt.
+
+Overfull \hbox (10.45987pt too wide) in paragraph at lines 593--594
+\T1/ppl/b/n/12 http://34.76.240.69:8080/Hilo/\T1/ppl/m/n/12 ), que de-vol-ve-rá
+ \T1/ppl/m/it/12 CO-RRIEN-DO\T1/ppl/m/n/12 , \T1/ppl/m/it/12 PA-RA-DO \T1/ppl/m
+/n/12 o \T1/ppl/m/it/12 PAU-
+ []
+
+LaTeX Info: Redefining \. on input line 595.
+LaTeX Info: Redefining \% on input line 595.
+[28 <./img/mainwindow.png>]
+<img/ventanacontrol1.png, id=472, 511.31026pt x 219.82124pt>
+File: img/ventanacontrol1.png Graphic file (type png)
+<use img/ventanacontrol1.png>
+Package pdftex.def Info: img/ventanacontrol1.png  used on input line 600.
+(pdftex.def)             Requested size: 397.10394pt x 170.71652pt.
+<img/ventanavisualizacion1.png, id=473, 486.01575pt x 210.7875pt>
+File: img/ventanavisualizacion1.png Graphic file (type png)
+<use img/ventanavisualizacion1.png>
+Package pdftex.def Info: img/ventanavisualizacion1.png  used on input line 607.
+
+(pdftex.def)             Requested size: 393.63351pt x 170.71652pt.
+LaTeX Info: Redefining \. on input line 613.
+LaTeX Info: Redefining \% on input line 613.
+ [29 <./img/ventanacontrol1.png> <./img/ventanavisualizacion1.png>]
+<img/ventanacontrol2.png, id=483, 511.31026pt x 220.4235pt>
+File: img/ventanacontrol2.png Graphic file (type png)
+<use img/ventanacontrol2.png>
+Package pdftex.def Info: img/ventanacontrol2.png  used on input line 616.
+(pdftex.def)             Requested size: 396.00388pt x 170.71652pt.
+<img/ventanavisualizacion2.png, id=484, 486.618pt x 211.38976pt>
+File: img/ventanavisualizacion2.png Graphic file (type png)
+<use img/ventanavisualizacion2.png>
+Package pdftex.def Info: img/ventanavisualizacion2.png  used on input line 623.
+
+(pdftex.def)             Requested size: 393.0075pt x 170.71652pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 628--629
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 630--631
+
+ []
+
+LaTeX Info: Redefining \. on input line 631.
+LaTeX Info: Redefining \% on input line 631.
+[30 <./img/ventanacontrol2.png> <./img/ventanavisualizacion2.png>]
+<img/ventanaescenario.png, id=492, 124.66576pt x 183.084pt>
+File: img/ventanaescenario.png Graphic file (type png)
+<use img/ventanaescenario.png>
+Package pdftex.def Info: img/ventanaescenario.png  used on input line 636.
+(pdftex.def)             Requested size: 116.2461pt x 170.71652pt.
+LaTeX Info: Redefining \. on input line 645.
+LaTeX Info: Redefining \% on input line 645.
+ [31 <./img/ventanaescenario.png>] [32
 
 ]
 Cap\'{\i }tulo 6.
-[21] [22
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 453--456
+Underfull \hbox (badness 10000) in paragraph at lines 649--650
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 651--652
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 653--654
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 655--656
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 657--658
+
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [33]
+Underfull \hbox (badness 10000) in paragraph at lines 663--664
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 665--666
+
+ []
+
+LaTeX Info: Redefining \. on input line 673.
+LaTeX Info: Redefining \% on input line 673.
+[34]
+Underfull \hbox (badness 10000) in paragraph at lines 684--687
 [][]$\T1/cmtt/m/n/12 https : / / static1 . squarespace . com / static / 52e733d
 8e4b062fc0c603ea8 /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 458--461
+Underfull \hbox (badness 10000) in paragraph at lines 684--687
+\T1/cmtt/m/n/12 t / 53a13620e4b0d80b1acadb20 / 1403074080427 / nao _
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 689--692
 [][]$\T1/cmtt/m/n/12 https : / / riunet . upv . es / bitstream / handle / 10251
  / 94065 / BENGOCHEA %
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 458--461
+Underfull \hbox (badness 10000) in paragraph at lines 689--692
 \T1/cmtt/m/n/12 20-[] % 20Desarrollo % 20de % 20un % 20sistema % 20de % 20monit
 orizaci % C3 % B3n %
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 458--461
+Underfull \hbox (badness 10000) in paragraph at lines 689--692
 \T1/cmtt/m/n/12 20y % 20control % 20de % 20un % 20robot % 20simulador % 20de % 
 20diabetes . pdf ?
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 463--466
+Underfull \hbox (badness 10000) in paragraph at lines 694--697
 [][]$\T1/cmtt/m/n/12 https : / / recursos . apser . es / hubfs / Infograf % C3 
 % ADas /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 483--486
+Underfull \hbox (badness 10000) in paragraph at lines 714--717
 [][]$\T1/cmtt/m/n/12 https : / / es . wikipedia . org / wiki / Protocolo _ de _
  transferencia _ de _
  []
 
+[35
 
-Underfull \hbox (badness 10000) in paragraph at lines 493--496
+]
+Underfull \hbox (badness 10000) in paragraph at lines 724--727
 [][]$\T1/cmtt/m/n/12 https : / / www . ibm . com / developerworks / ssa / libra
 ry / ws-[]restful / index .
  []
 
-[23]
-LaTeX Info: Redefining \. on input line 519.
-LaTeX Info: Redefining \% on input line 519.
- [24]
-Ap\'{e}ndice A.
-[25
 
+Overfull \hbox (109.30188pt too wide) in paragraph at lines 759--762
+[][]$\T1/cmtt/m/n/12 https : / / www . hivemq . com / blog / mqtt-[]essentials-
+[]part-[]6-[]mqtt-[]quality-[]of-[]service-[]levels/$[][] 
+ []
 
-] [26
-
-]
-Ap\'{e}ndice B.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 558.
-[27]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 558.
+LaTeX Info: Redefining \. on input line 765.
+LaTeX Info: Redefining \% on input line 765.
+[36]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 799.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 799.
  (plantillatfg.aux
 LaTeX Info: Redefining \. on input line 23.
 LaTeX Info: Redefining \% on input line 23.
@@ -1007,20 +1219,27 @@ LaTeX Info: Redefining \% on input line 27.
 LaTeX Info: Redefining \. on input line 29.
 LaTeX Info: Redefining \% on input line 29.
 )
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 558.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 558.
-Package rerunfilecheck Info: File `plantillatfg.out' has not changed.
-(rerunfilecheck)             Checksum: DFDDC7CB2A138881DF16636F076D5E07;2011.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 558.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 799.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 799.
+
+
+Package rerunfilecheck Warning: File `plantillatfg.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `plantillatfg.out':
+(rerunfilecheck)             Before: 7480142FBAD1343550800789F962D53D;2260
+(rerunfilecheck)             After:  DE6E61C42307555A66DA0235D6113F07;2261.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 799.
  ) 
 Here is how much of TeX's memory you used:
- 11269 strings out of 492895
- 167266 string characters out of 3133479
- 373466 words of memory out of 3000000
- 14885 multiletter control sequences out of 15000+200000
+ 11371 strings out of 492895
+ 169439 string characters out of 3133479
+ 376466 words of memory out of 3000000
+ 14950 multiletter control sequences out of 15000+200000
  46159 words of font info for 83 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 43i,12n,60p,931b,802s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 43i,12n,60p,1351b,802s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/base/8r.enc} <C:\Users\Jahel\App
 Data\Local\MiKTeX\2.9\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1200.pk> <C:\Users
 \Jahel\AppData\Local\MiKTeX\2.9\fonts/pk/ljfour/jknappen/ec/dpi600\ecss1200.pk>
@@ -1031,9 +1250,9 @@ knappen/ec/dpi600\ecsx2488.pk><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/pala
 tino/uplb8a.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/palatino/uplbi8a.p
 fb><C:/Program Files/MiKTeX 2.9/fonts/type1/urw/palatino/uplr8a.pfb><C:/Program
  Files/MiKTeX 2.9/fonts/type1/urw/palatino/uplri8a.pfb>
-Output written on plantillatfg.pdf (35 pages, 1307593 bytes).
+Output written on plantillatfg.pdf (44 pages, 1562555 bytes).
 PDF statistics:
- 673 PDF objects out of 1000 (max. 8388607)
- 93 named destinations out of 1000 (max. 500000)
- 309 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 807 PDF objects out of 1000 (max. 8388607)
+ 119 named destinations out of 1000 (max. 500000)
+ 388 words of extra memory for PDF output out of 10000 (max. 10000000)
 

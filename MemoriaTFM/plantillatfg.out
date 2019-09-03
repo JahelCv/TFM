@@ -13,19 +13,22 @@
 \BOOKMARK [2][-]{subsection.2.3.1}{HTTP}{section.2.3}% 13
 \BOOKMARK [2][-]{subsection.2.3.2}{REST}{section.2.3}% 14
 \BOOKMARK [2][-]{subsection.2.3.3}{HTTP y REST en este proyecto}{section.2.3}% 15
-\BOOKMARK [1][-]{section.2.4}{MQTT}{chapter.2}% 16
+\BOOKMARK [1][-]{section.2.4}{Sistema MQTT}{chapter.2}% 16
 \BOOKMARK [2][-]{subsection.2.4.1}{Introducci\363n a MQTT}{section.2.4}% 17
 \BOOKMARK [2][-]{subsection.2.4.2}{MQTT en este proyecto}{section.2.4}% 18
 \BOOKMARK [1][-]{section.2.5}{Librer\355a para el c\341lculo diferencial}{chapter.2}% 19
 \BOOKMARK [0][-]{chapter.3}{C\363digo en NAO}{}% 20
-\BOOKMARK [0][-]{chapter.4}{Aplicaci\363n Java}{}% 21
-\BOOKMARK [0][-]{chapter.5}{Relaci\363n entre los componentes}{}% 22
-\BOOKMARK [1][-]{section.5.1}{?? ???? ???? ? ?? ??}{chapter.5}% 23
-\BOOKMARK [0][-]{chapter.6}{Conclusions}{}% 24
-\BOOKMARK [1][-]{section.6.1}{Mejoras}{chapter.6}% 25
-\BOOKMARK [1][-]{section.6.2}{Conclusiones}{chapter.6}% 26
-\BOOKMARK [0][-]{chapter*.15}{Bibliograf\355a}{}% 27
-\BOOKMARK [0][-]{appendix.Alph1}{Configuraci\363 del sistema}{}% 28
-\BOOKMARK [1][-]{section.Alph1.1}{Fase d'inicialitzaci\363}{appendix.Alph1}% 29
-\BOOKMARK [1][-]{section.Alph1.2}{Identificaci\363 de dispositius}{appendix.Alph1}% 30
-\BOOKMARK [0][-]{appendix.Alph2}{??? ???????????? ????}{}% 31
+\BOOKMARK [1][-]{section.3.1}{Problemas con el c\363digo anterior}{chapter.3}% 21
+\BOOKMARK [1][-]{section.3.2}{C\363digo actual}{chapter.3}% 22
+\BOOKMARK [2][-]{subsection.3.2.1}{Cambio a Python}{section.3.2}% 23
+\BOOKMARK [2][-]{subsection.3.2.2}{Clases del c\363digo en NAO}{section.3.2}% 24
+\BOOKMARK [0][-]{chapter.4}{Aplicaci\363n Java}{}% 25
+\BOOKMARK [1][-]{section.4.1}{MQTT en la aplicaci\363n Java}{chapter.4}% 26
+\BOOKMARK [1][-]{section.4.2}{HTTP en la aplicaci\363n Java}{chapter.4}% 27
+\BOOKMARK [0][-]{chapter.5}{Relaci\363n entre los componentes}{}% 28
+\BOOKMARK [1][-]{section.5.1}{Jerarqu\355a de los componentes}{chapter.5}% 29
+\BOOKMARK [1][-]{section.5.2}{Traza de ejecuci\363n}{chapter.5}% 30
+\BOOKMARK [0][-]{chapter.6}{Conclusiones}{}% 31
+\BOOKMARK [1][-]{section.6.1}{Posibles mejoras}{chapter.6}% 32
+\BOOKMARK [1][-]{section.6.2}{Conclusiones}{chapter.6}% 33
+\BOOKMARK [0][-]{chapter*.27}{Bibliograf\355a}{}% 34
