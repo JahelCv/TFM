@@ -16,7 +16,7 @@ from DispatchMQTT import DispatchMQTT
 from Escenario import Escenario
 from Interaccion import Interaccion
 
-ip = "andy.local"
+ip = "rogue1.local"
 
 # Global variable to store the Server module instance
 Server = None

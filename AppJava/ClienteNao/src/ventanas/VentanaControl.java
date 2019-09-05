@@ -324,7 +324,7 @@ public class VentanaControl extends JFrame {
 				
 				comboBox = new JComboBox<String>();
 				comboBox.setFont(new Font("Tahoma", Font.PLAIN, 14));
-				comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"Pincharse", "Sentarse", "Comer", "MedirGlucosa", "Correr"}));
+				comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"Pincharse", "Sentarse", "Comer", "MedirGlucosa", "Correr", "Levantarse"}));
 				comboBox.setToolTipText("");
 				GridBagConstraints gbc_comboBox = new GridBagConstraints();
 				gbc_comboBox.insets = new Insets(0, 1, 1, 1);

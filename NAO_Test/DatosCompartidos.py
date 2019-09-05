@@ -103,7 +103,9 @@ class DatosCompartidos():
         
     def arrancarHiloExcluyente(self, id):
         ret = True
+        print 'DatosCompartidos # arrancarHiloExcluyente: Antes del acquire'
         self.mutexHilosExc.acquire()
+        print 'DatosCompartidos # arrancarHiloExcluyente: Despues del acquire'
         if self.hiloExcluyenteCorriendo == None or self.hiloExcluyenteCorriendo == '':
             if id in self.hilosExcluyentes.keys():
                 h = self.hilosExcluyentes[id][0]
@@ -120,16 +122,23 @@ class DatosCompartidos():
         
     def pararHiloExcluyente(self,id):
         ret = False
+        print 'DatosCompartidos # pararHiloExcluyente: Antes del acquire'
         self.mutexHilosExc.acquire()
-        print 'DatosCompartidos - Para hilo excluyente'
+        print 'DatosCompartidos # pararHiloExcluyente: Despues del acquire'
+        print 'DatosCompartidos # Para hilo excluyente'
         if id in self.hilosExcluyentes.keys():
+            print 'DatosCompartidos # pararHiloExcluyente: El id esta en las keys'
             h = self.hilosExcluyentes[id][0]
             if self.hilosExcluyentes[id][1] != "PARADO":
+                print 'DatosCompartidos # pararHiloExcluyente: Antes de h.pararThread()'
                 h.pararThread()
+                print 'DatosCompartidos # pararHiloExcluyente: Despues de h.pararThread()'
                 self.hiloExcluyenteCorriendo = None
                 self.hilosExcluyentes[id][1] = "PARADO"
                 ret = True
+                print 'DatosCompartidos # pararHiloExcluyente: Antes de release'
         self.mutexHilosExc.release()
+        print 'DatosCompartidos # pararHiloExcluyente: Despues del release'
         return ret
         
     def pausarHiloExcluyente(self, id):    

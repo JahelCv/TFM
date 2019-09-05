@@ -125,7 +125,7 @@ class DatosCompartidos():
         print 'DatosCompartidos # pararHiloExcluyente: Antes del acquire'
         self.mutexHilosExc.acquire()
         print 'DatosCompartidos # pararHiloExcluyente: Despues del acquire'
-        print 'DatosCompartidos - Para hilo excluyente'
+        print 'DatosCompartidos # Para hilo excluyente'
         if id in self.hilosExcluyentes.keys():
             print 'DatosCompartidos # pararHiloExcluyente: El id esta en las keys'
             h = self.hilosExcluyentes[id][0]

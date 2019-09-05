@@ -48,6 +48,7 @@ class Interaccion(object):
         if hasattr(self, "hilo"):
             print 'Interaccion # pararThread: Antes del join'
             self.hilo.join()
+            print 'Interaccion # pararThread: Antes del publicaInterfazHilosMQTT'
             self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
             print 'Interaccion # pararThread: Se hace el join'
     
@@ -201,6 +202,5 @@ class Interaccion(object):
                         self.ac.decirFrase("Ahora mismo mi glucosa es de valor " + glu)
     
         # Cuando se sale del bucle...
-        self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,PARADO")
         self.ac.posicionParada()
         self.ac.setThreadBlock(False)

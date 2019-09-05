@@ -29,7 +29,7 @@ class DispatchMQTT(object):
 #        print "Despues de hacer un publish"
         
     def publicaVentanaEscenarioMQTT(self, msg):
-        print "DispatchMQTT # publicaVentanaEscenarioMQTT: Publico -> " + msg
+        print "DispatchMQTT # publicaVentanaEscenarioMQTT: Publico -> " + str(msg)
         self.mqttclient.publish("interfaz/ventanaescenario",msg)
     
     def callbackReceived(self, client, userdata, message):
@@ -47,8 +47,8 @@ class DispatchMQTT(object):
             if fmsg >= 0.1 and fmsg <= 0.9:
                 self.datos.modifyData("EXACPALABRA", fmsg)
         
-        elif message.topic == "nao/hilos":
-            print("Recibo en nao/hilos: ", str(message.payload.decode("utf-8")))
+        elif message.topic == "hilos":
+            print("Recibo en hilos: ", str(message.payload.decode("utf-8")))
             mensaje = str(message.payload.decode("utf-8"))
             lmensaje = mensaje.split(',')
             if lmensaje[1] == "PARADO":
@@ -95,6 +95,8 @@ class DispatchMQTT(object):
                 self.acNAO.accionMedirGlucosa()
             elif str(message.payload.decode("utf-8")) == "Correr":
                 self.acNAO.accionCorrer()
+            elif str(message.payload.decode("utf-8")) == "Levantarse":
+                self.acNAO.accionLevantarse()
                 
     def pararMQTT(self):
         self.mqttclient.loop_stop()

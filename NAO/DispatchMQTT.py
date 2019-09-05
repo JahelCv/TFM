@@ -24,9 +24,7 @@ class DispatchMQTT(object):
         self.mqttclient.subscribe("nao/mover")
         
     def publicaInterfazHilosMQTT(self, msg):
-#        print "Antes de hacer un publish"
-        self.mqttclient.publish("hilos",msg)
-#        print "Despues de hacer un publish"
+        self.mqttclient.publish("hilos",msg+",CALLBACKNO")
         
     def publicaVentanaEscenarioMQTT(self, msg):
         print "DispatchMQTT # publicaVentanaEscenarioMQTT: Publico -> " + str(msg)
@@ -48,18 +46,21 @@ class DispatchMQTT(object):
                 self.datos.modifyData("EXACPALABRA", fmsg)
         
         elif message.topic == "hilos":
-            print("Recibo en hilos: ", str(message.payload.decode("utf-8")))
+            print "Recibo en hilos: " + str(message.payload.decode("utf-8"))
             mensaje = str(message.payload.decode("utf-8"))
             lmensaje = mensaje.split(',')
-            if lmensaje[1] == "PARADO":
-                print("Paro hilo id: " + lmensaje[0])
-                self.datos.pararHiloExcluyente(lmensaje[0])
-            elif lmensaje[1] == "CORRIENDO":
-                print("Arranco hilo id: " + lmensaje[0])
-                self.datos.arrancarHiloExcluyente(lmensaje[0])
-            elif lmensaje[1] == "PAUSADO":
-                print("Pauso hilo id: " + lmensaje[0])
-                self.datos.pausarHiloExcluyente(lmensaje[0])
+            if len(lmensaje) > 2:
+                pass
+            else:
+				if lmensaje[1] == "PARADO":
+					print("Paro hilo id: " + lmensaje[0])
+					self.datos.pararHiloExcluyente(lmensaje[0])
+				elif lmensaje[1] == "CORRIENDO":
+					print("Arranco hilo id: " + lmensaje[0])
+					self.datos.arrancarHiloExcluyente(lmensaje[0])
+				elif lmensaje[1] == "PAUSADO":
+					print("Pauso hilo id: " + lmensaje[0])
+					self.datos.pausarHiloExcluyente(lmensaje[0])
         
         # En este topic viene en formato verde,on
         # siendo el primer componente rojo, azul o verde
@@ -95,6 +96,8 @@ class DispatchMQTT(object):
                 self.acNAO.accionMedirGlucosa()
             elif str(message.payload.decode("utf-8")) == "Correr":
                 self.acNAO.accionCorrer()
+            elif str(message.payload.decode("utf-8")) == "Levantarse":
+                self.acNAO.accionLevantarse()
                 
     def pararMQTT(self):
         self.mqttclient.loop_stop()

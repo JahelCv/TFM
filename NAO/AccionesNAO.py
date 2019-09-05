@@ -259,6 +259,7 @@ class AccionesNAO():
     
     def accionLevantarse(self):
         if self.isMoving or self.isWaitingWord:
+            print "AccionesNAO # No se levanta porque self.isMoving = " + str(self.isMoving) + " y self.isWaitingWord = " + str(self.isWaitingWord)
             return False
         else:
             try:
@@ -268,9 +269,11 @@ class AccionesNAO():
                 self.motion.waitUntilMoveIsFinished()
                 self.isMoving = False
                 self.mutexAcciones.release()
+                print "AccionesNAO # Se levanta"
                 return True
             except Exception:
                 self.isMoving = False
+                print "AccionesNAO # EXCEPTION en se levanta"
                 self.mutexAcciones.release()
                 return False
     

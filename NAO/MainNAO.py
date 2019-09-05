@@ -18,7 +18,7 @@ from DispatchMQTT import DispatchMQTT
 from Escenario import Escenario
 from Interaccion import Interaccion
 
-ip = "andy.local"
+ip = "rogue1.local"
 
 # Global variable to store the Server module instance
 Server = None
@@ -63,14 +63,14 @@ class ServerModule(ALModule):
             print 'Creo Escenario'
             self.dc.addHiloExcluyente("ESCENARIO", self.es)
             print 'Anyado ESCENARIO como hilo excluyente'
-            self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,"+self.dc.getEstadoHiloExcluyente("ESCENARIO"))
+            self.dmqtt.publicaInterfazHilosMQTT("ESCENARIO,"+self.dc.getEstadoHiloExcluyente("ESCENARIO")+",CALLBACKNO")
             print 'Hago un publish al mqtt del ESCENARIO' 
             
             self.inte = Interaccion(self.dc, self.ac, self.simremoto, self.dmqtt)
             print 'Creo Interaccion'
             self.dc.addHiloExcluyente("INTERACCION", self.inte)
             print 'Anyado INTERACCION como hilo excluyente'
-            self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,"+self.dc.getEstadoHiloExcluyente("INTERACCION"))
+            self.dmqtt.publicaInterfazHilosMQTT("INTERACCION,"+self.dc.getEstadoHiloExcluyente("INTERACCION")+",CALLBACKNO")
             print 'Hago un publish al mqtt del INTERACCION'
             self.ac.setLedsOjosRed(False)
             self.ac.setLedsOjosGreen(True)
