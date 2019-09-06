@@ -148,7 +148,7 @@ class Interaccion(object):
                             elif self.contador == 4:
                                 self.ac.decirFrase("Me sentaré en el suelo porque veo que no me habéis traido una silla.")
     
-                        self.ac.accionSentarse()
+                        #self.ac.accionSentarse()
                         self.actualizarContador()
                         self.ultimaPostura = "sientate"
                         time.sleep(1)
@@ -191,7 +191,7 @@ class Interaccion(object):
                                 self.ac.decirFrase("Ya era hora de un descanso.")
                             elif self.contador == 4:
                                 self.ac.decirFrase("Solo me falta una cama.")
-                            self.ac.accionTumbarse()
+                            #self.ac.accionTumbarse()
                             self.actualizarContador()
                         self.ultimaPostura = "tumbate"
                         self.ac.decirFrase("Despiertame dentro de 5 minutitos.")

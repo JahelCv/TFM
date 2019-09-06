@@ -81,8 +81,7 @@ class Escenario(object):
     def fase3(self):
         cho = 0
         bolus = 0
-#        respEspera = 1
-#        palabraRec = ""
+        probability = random.randint(0,10)
         self.dmqtt.publicaVentanaEscenarioMQTT("##### Principio del bucle ##### \nFase: 3 \nEstado: " 
             + str(self.estado) + " \nNumero random: " +str(self.numerorandom)
             + "\nPalabra recibida: " + str(self.palabraRec) + " \nPalabra anterior: "
@@ -103,7 +102,10 @@ class Escenario(object):
                     self.iniFase3 = False
                     self.estado = 1
                 else:
-                    self.estado = 3
+                    if self.estadoprevio == 1:
+                        self.estado = 1
+                    else:
+                        self.estado = 3
             else:
                 self.estado = 1
                 
@@ -196,7 +198,8 @@ class Escenario(object):
                 self.acNAO.decirFrase('Ahora mismo mi glucosa es de valor ' + str(self.mirarGlucosa()))
                 self.acNAO.decirFrase('Es muy alta pero como acabo de intentar modificarla voy a esperar un ratito.')    
                 
-        
+        self.estadoprevio = self.estado
+		
         ################################################
         #### ESPERAMOS RESPUESTA DE PERSONA ############
         ################################################
@@ -250,7 +253,7 @@ class Escenario(object):
                             self.acNAO.decirFrase('Me sentaré en el suelo porque veo que no me habéis traido una silla.')
                     
                     self.actualizarContador()
-                    self.acNAO.accionSentarse()
+                    #self.acNAO.accionSentarse()
                     self.ultimaPostura = 'sientate'
                     time.sleep(1)
                     
@@ -292,7 +295,7 @@ class Escenario(object):
                             self.acNAO.decirFrase('Ya era hora de un descanso.')
                         elif self.contador == 4:
                             self.acNAO.decirFrase('Solo me falta una cama.')
-                        self.acNAO.accionTumbarse()
+                        #self.acNAO.accionTumbarse()
                         self.actualizarContador()
                     
                     self.ultimaPostura = 'tumbate'
@@ -395,7 +398,7 @@ class Escenario(object):
                     self.estado = 3
                     self.simremoto.enviaDatosSimulacion(bolus,cho,True,0,50,30)
                     self.tiempoUltimaPeticionSimu = time.time()
-                    self.acNAO.accionCorrer()
+                    #self.acNAO.accionCorrer()
                     
             # Case estado = 2
             elif self.estado == 2:
@@ -568,7 +571,7 @@ class Escenario(object):
                     if self.numEjercicio == 1:
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
                         self.simremoto.enviaDatosSimulacion(0,0,True,0,50,60)
-                        self.acNAO.accionCorrer()
+                        #self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Uff... Estoy agotado.')
                         self.numEjercicio = self.numEjercicio + 1
                     elif self.numEjercicio == 2:
@@ -578,7 +581,7 @@ class Escenario(object):
                         self.acNAO.accionComer()
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
                         self.simremoto.enviaDatosSimulacion(0,15,True,30,50,60)
-                        self.acNAO.accionCorrer()
+                        #self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte, me siento bien.')
                         self.numEjercicio = self.numEjercicio + 1
                         self.numHambre = 1
@@ -597,7 +600,7 @@ class Escenario(object):
                         	
                         self.acNAO.decirFrase('Voy a correr un poco, abran hueco.')
                         self.simremoto.enviaDatosSimulacion(0,cho,True,30,50,60)
-                        self.acNAO.accionCorrer()
+                        #self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte.')
                         self.numEjercicio = self.numEjercicio + 1
                         
@@ -626,7 +629,7 @@ class Escenario(object):
                         self.acNAO.accionComer()
                         self.acNAO.decirFrase('Se me hace tarde, la clase de gimnasia empieza ahora.')
                         self.simremoto.enviaDatosSimulacion(bolus,cho,True,120,50,60)
-                        self.acNAO.accionCorrer()
+                        #self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte.')
                         self.numHambre = 0
                     elif self.numHambre == 2:
@@ -648,7 +651,7 @@ class Escenario(object):
                         self.acNAO.accionComer()
                         self.acNAO.decirFrase('Se me hace tarde, la clase de gimnasia empieza ahora.')
                         self.simremoto.enviaDatosSimulacion(bolus,cho,True,120,50,60)
-                        self.acNAO.accionCorrer()
+                        #self.acNAO.accionCorrer()
                         self.acNAO.decirFrase('Ya he acabado de hacer deporte. Me siento genial.')
                     else:
                         self.acNAO.decirFrase('No, la verdad es que no tengo hambre.')
@@ -670,6 +673,7 @@ class Escenario(object):
         self.numEjercicio = 1
         self.estadotaller = 1
         self.estado = 1
+        self.estadoprevio = 1
         self.contador = 1
         self.iniFase3 = True
         

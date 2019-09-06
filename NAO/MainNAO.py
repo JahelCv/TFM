@@ -18,7 +18,7 @@ from DispatchMQTT import DispatchMQTT
 from Escenario import Escenario
 from Interaccion import Interaccion
 
-ip = "rogue1.local"
+ip = "andy.local"
 
 # Global variable to store the Server module instance
 Server = None
@@ -43,7 +43,7 @@ class ServerModule(ALModule):
         self.ac = AccionesNAO(self.tts, self.asr, self.memory, self.leds, 
                               self.postureProxy, self.motionProxy, self.autmov, 
                               self.aspeech, "Server")    
-        self.ac.setRotateEyes()
+        #self.ac.setRotateEyes()
         
         # DatosCompartidos tendrá un mejor uso más adelante
         # Se puede fusionar con ThreadManager
